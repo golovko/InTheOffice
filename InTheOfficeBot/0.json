@@ -1,0 +1,14 @@
+[
+  {
+    "chatId": 0,
+    "weekOfTheYear": 0,
+    "userId": 0,
+    "selectedDays": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  }
+]
