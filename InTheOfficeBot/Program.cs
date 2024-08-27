@@ -1,17 +1,20 @@
 using InTheOfficeBot;
-using InTheOfficeBot.Repository;
-using Microsoft.EntityFrameworkCore;
+using InTheOfficeBot.Helpers;
+using InTheOfficeBot.Models;
 
 var builder = Host.CreateApplicationBuilder(args);
-var botToken = builder.Configuration["BotToken"]!;
-builder.Services.AddSingleton(botToken);
-builder.Services.AddDbContext<Context>(options =>
-    options.UseSqlite("Data Source=botdatabase.db"));
+
+var botConfiguration = new BotConfiguration{
+    BotToken = builder.Configuration["BotConfiguration:BotToken"]!,
+    SendDateTime = Helpers.ParseDayAndTime(builder.Configuration["BotConfiguration:SendDateTime"]!),
+};
+builder.Services.AddSingleton(botConfiguration);
 builder.Services.AddHostedService<Worker>(serviceProvider =>
 {
-  var token = serviceProvider.GetRequiredService<string>();
   var logger = serviceProvider.GetRequiredService<ILogger<Worker>>();
-  return new Worker(logger, token);
+  var config = serviceProvider.GetRequiredService<BotConfiguration>(); 
+
+  return new Worker(logger, config);
 });
 var host = builder.Build();
 host.Run();

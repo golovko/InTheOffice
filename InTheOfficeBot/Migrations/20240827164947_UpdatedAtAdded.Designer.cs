@@ -9,9 +9,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace InTheOfficeBot.Migrations
 {
-    [DbContext(typeof(Context))]
-    [Migration("20240824182102_Initial")]
-    partial class Initial
+    [DbContext(typeof(SqLiteContext))]
+    [Migration("20240827164947_UpdatedAtAdded")]
+    partial class UpdatedAtAdded
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

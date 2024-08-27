@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using InTheOfficeBot.Models;
 namespace InTheOfficeBot.Repository;
-class Context : DbContext
+partial class SqLiteContext : DbContext
 {
   public DbSet<Answer> Answers { get; set; }
 
