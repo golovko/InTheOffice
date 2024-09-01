@@ -24,9 +24,9 @@ class AnswersRepository : IRepository
     return _db.Answers.Select(c => c.ChatId).Distinct().ToArray();
   }
 
-  public Answer? GetLatestUserAnswer(Answer answer)
+  public Answer? GetLatestUserAnswer(long chatId, int weekOfTheYear, long userId)
   {
-    return _db.Answers.FirstOrDefault(a => a.ChatId == answer.ChatId && a.UserId == answer.UserId && a.WeekOfTheYear == answer.WeekOfTheYear);
+    return _db.Answers.FirstOrDefault(a => a.ChatId == chatId && a.UserId == userId && a.WeekOfTheYear == weekOfTheYear);
   }
 
   public void SaveAnswer(Answer answer)

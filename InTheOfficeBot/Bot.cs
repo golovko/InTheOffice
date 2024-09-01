@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Text;
 using InTheOfficeBot;
 using InTheOfficeBot.Helpers;
@@ -12,7 +11,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 class Bot
 {
-  private string _welcomeMessage = $"Welcome!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
+  private string _welcomeMessage = $"Hiya!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
   private TelegramBotClient _bot;
   private CancellationTokenSource _cts = new CancellationTokenSource();
   private IRepository _repo;
@@ -30,83 +29,81 @@ class Bot
 
   public async Task BotAction()
   {
-    var me = await _bot.GetMeAsync();
-    _bot.OnError += OnError;
-    _bot.OnMessage += OnMessage;
-    _bot.OnUpdate += OnUpdate;
-    
-    Console.WriteLine($"@{me.Username} is running... Press Enter to terminate");
-    Console.ReadLine();
-    _cts.Cancel(); // stop the bot
+    this._bot.OnError += OnError;
+    this._bot.OnMessage += OnMessage;
+    this._bot.OnUpdate += OnUpdate;
   }
 
   private async Task OnError(Exception exception, HandleErrorSource source)
   {
-    _logger.LogInformation(exception, exception.Message);
+    this._logger.LogInformation(exception, exception.Message);
   }
 
   async Task OnMessage(Message msg, UpdateType type)
   {
-    if (msg.Text == "/select")
+    if (msg.Text == "/check")
     {
-      await _bot.SendTextMessageAsync(msg.Chat.Id, _welcomeMessage, parseMode: ParseMode.Html);
+      var text = $"<b>Week: {_week.range}</b>\n{ShowAnswers(msg.Chat.Id, _week.number)}";
+      await this._bot.SendTextMessageAsync(msg.Chat.Id, text, parseMode: ParseMode.Html);
+    }
+    if (msg.Text == "/poll")
+    {
+      await this._bot.SendTextMessageAsync(msg.Chat.Id, _welcomeMessage, parseMode: ParseMode.Html);
       await SendReplyKeyboard(msg.Chat.Id);
     }
   }
 
   async Task OnUpdate(Update update)
   {
-    if (update is { CallbackQuery: { } query }) // non-null CallbackQuery
+    if (update.CallbackQuery is not { } query)
     {
-      await _bot.AnswerCallbackQueryAsync(query.Id, $"You picked {query.Data}");
-
-      var day = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), query.Data!, true);
-      var chatId = query.Message!.Chat.Id;
-      var messageId = query.Message.MessageId;
-
-      Answer? answer = new Answer(chatId, _week.number, query.From.Id);
-      var latestAnswer = _repo.GetLatestUserAnswer(answer);
-      if (latestAnswer != null)
-      {
-        latestAnswer.SelectedDays[(int)day - 1] = !latestAnswer.SelectedDays[(int)day - 1];
-        _repo.SaveAnswer(latestAnswer);
-      }
-      else
-      {
-        answer.SetDay((int)day - 1, !answer.SelectedDays[(int)day - 1]);
-        _repo.SaveAnswer(answer);
-      }
-      await _bot.EditMessageTextAsync(chatId, messageId: messageId, text: ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
+      return;
     }
+
+    await this._bot.AnswerCallbackQueryAsync(query.Id, $"You picked {query.Data}");
+
+    var day = Enum.Parse<DayOfWeek>(query.Data!, true);
+    var chatId = query.Message!.Chat.Id;
+    var messageId = query.Message.MessageId;
+
+    var userId = query.From.Id;
+    var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new Answer(chatId, _week.number, userId);
+
+    var dayIndex = (int)day - 1;
+    latestAnswer.SelectedDays[dayIndex] = !latestAnswer.SelectedDays[dayIndex];
+
+    this._repo.SaveAnswer(latestAnswer);
+
+    var updatedText = ShowAnswers(chatId, _week.number);
+    var replyMarkup = InlineKeyboard();
+
+    await this._bot.EditMessageTextAsync(chatId, messageId, updatedText, replyMarkup: replyMarkup, parseMode: ParseMode.Html);
   }
 
-  public async Task SendMessageForNextWeek()
+  public async Task SendPoll()
   {
-    if (Helpers.SendNow(this._config.SendDateTime))
+    var chatIds = this._repo.GetChatIds();
+    foreach (var chatId in chatIds)
     {
-      var chatIds = _repo.GetChatIds();
-      foreach (var chatId in chatIds)
-      {
-        System.Console.WriteLine("Sending a message into the chat: " + chatId);
-        await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
-        await SendReplyKeyboard(chatId);
-      }
+      this._logger.LogInformation("Sending a message into the chat: " + chatId);
+
+      await this._bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+      await SendReplyKeyboard(chatId);
     }
   }
-
 
   async Task<Message> SendReplyKeyboard(long chatId)
   {
-    return await _bot.SendTextMessageAsync(chatId, ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
+    return await this._bot.SendTextMessageAsync(chatId, ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
   }
 
   InlineKeyboardMarkup InlineKeyboard()
   {
     return new InlineKeyboardMarkup()
-                   .AddButtons(DayOfWeek.Monday.ToString(), DayOfWeek.Tuesday.ToString(), DayOfWeek.Wednesday.ToString())
-                   .AddNewRow()
-                   .AddButton(DayOfWeek.Thursday.ToString())
-                   .AddButton(DayOfWeek.Friday.ToString());
+      .AddButtons(DayOfWeek.Monday.ToString(), DayOfWeek.Tuesday.ToString(), DayOfWeek.Wednesday.ToString())
+      .AddNewRow()
+      .AddButton(DayOfWeek.Thursday.ToString())
+      .AddButton(DayOfWeek.Friday.ToString());
   }
 
   public bool[] SelectedDays(long chatId)
@@ -127,8 +124,8 @@ class Bot
   {
     var result = new StringBuilder();
     var s = SelectedDays(chatId);
-    result.AppendFormat(@"<b>Somebody in the office on</b>:
---------------------------------------------------------
+    var sombodyInTheOfiice = false;
+    result.AppendFormat(@"<b>Days covered</b>:
 Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 ",
        FormatDay(s[0]),
@@ -139,7 +136,10 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     result.Append("--------------------------------------------------------\n");
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
-
+    if (sombodyInTheOfiice)
+    {
+      result.Append("<b>Who is in the office:</b>\n");
+    }
     foreach (var answer in answersByWeek)
     {
       var user = _bot.GetChatMemberAsync(chatId, answer.UserId).Result;

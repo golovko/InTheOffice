@@ -2,6 +2,7 @@ namespace InTheOfficeBot.Models;
 
 public class BotConfiguration
 {
-    public string BotToken { get; init; } = default!;
-    public DateTime SendDateTime { get; init; } = default!;
+    public string BotToken { get; set; } = default!;
+    public DateTime SendDateTime { get; set; } = default!;
+    public int Interval { get; set; }
 }
