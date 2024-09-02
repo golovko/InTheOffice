@@ -41,15 +41,26 @@ class Bot
 
   async Task OnMessage(Message msg, UpdateType type)
   {
-    if (msg.Text == "/check")
+    long chatId = msg.Chat.Id;
+
+    switch (msg.Text)
     {
-      var text = $"<b>Week: {_week.range}</b>\n{ShowAnswers(msg.Chat.Id, _week.number)}";
-      await this._bot.SendTextMessageAsync(msg.Chat.Id, text, parseMode: ParseMode.Html);
-    }
-    if (msg.Text == "/poll")
-    {
-      await this._bot.SendTextMessageAsync(msg.Chat.Id, _welcomeMessage, parseMode: ParseMode.Html);
-      await SendReplyKeyboard(msg.Chat.Id);
+      case "/start":
+        string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
+                              "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
+                              "Use the /check command to see the latest answers.";
+        await _bot.SendTextMessageAsync(chatId, startMessage, parseMode: ParseMode.Html);
+        break;
+
+      case "/check":
+        string checkMessage = $"<b>Week: {_week.range}</b>\n{ShowAnswers(msg.Chat.Id, _week.number)}";
+        await _bot.SendTextMessageAsync(chatId, checkMessage, parseMode: ParseMode.Html);
+        break;
+
+      case "/poll":
+        await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+        await SendReplyKeyboard(chatId);
+        break;
     }
   }
 
