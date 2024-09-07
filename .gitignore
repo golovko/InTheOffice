@@ -228,3 +228,5 @@ local.settings.json
 /InlineQueries/Properties/launchSettings.json
 InTheOfficeBot/appsettings.Development.json
 InTheOfficeBot/botdatabase.db
+InTheOfficeBot/docker-compose.yml
+InTheOfficeBot/.docker/docker-compose.yml

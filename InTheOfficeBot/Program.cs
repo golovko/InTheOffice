@@ -6,7 +6,8 @@ var builder = Host.CreateApplicationBuilder(args);
 
 var botConfiguration = new BotConfiguration
 {
-  BotToken = builder.Configuration["BotConfiguration:BotToken"]!,
+  BotToken = Environment.GetEnvironmentVariable("BotToken") 
+               ?? builder.Configuration["BotConfiguration:BotToken"]!,
   SendDateTime = Helpers.ParseDayAndTime(builder.Configuration["BotConfiguration:SendDateTime"]!),
 };
 builder.Services.AddSingleton(botConfiguration);

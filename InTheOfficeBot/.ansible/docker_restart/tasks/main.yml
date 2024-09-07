@@ -1,0 +1,20 @@
+- name: Build docker image
+  docker_image:
+    name: intheofficebot
+    force_source: true
+    source: build
+    build:
+      path: "{{ APP_PATH }}"
+      dockerfile: .docker/Dockerfile
+
+- name: Run docker container
+  docker_container:
+    name: intheofficebot_container
+    image: intheofficebot
+    recreate: true
+    restart: true
+    ports: 
+      - "{{ PORT }}:{{ PORT }}"
+    env:
+      BotToken: "{{ BOT_TOKEN }}"
+

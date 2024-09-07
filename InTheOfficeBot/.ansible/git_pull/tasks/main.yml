@@ -1,0 +1,6 @@
+- name: Pull code from main branch
+  ansible.builtin.git:
+    repo: "git@github.com:{{ GITHUB_REPO }}.git"
+    dest: "{{ APP_PATH }}"
+    single_branch: yes
+    version: main

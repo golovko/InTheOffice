@@ -3,6 +3,20 @@ namespace InTheOfficeBot.Helpers;
 
 public static class Helpers
 {
+  public static bool IsCurrentDayAndTime(DateTime configDateTime)
+  {
+    // Get the current DateTime
+    DateTime currentDateTime = DateTime.Now;
+
+    // Check if the current day of the week matches the config day of the week
+    if (currentDateTime.DayOfWeek == configDateTime.DayOfWeek)
+    {
+      // Check if the current time matches the config time (hours and minutes)
+      return currentDateTime.Hour == configDateTime.Hour && currentDateTime.Minute == configDateTime.Minute;
+    }
+
+    return false;
+  }
   public static (string, int) GetWeekOrNextWeek()
   {
     var today = DateTime.Today;

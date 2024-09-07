@@ -144,7 +144,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
        FormatDay(s[2]),
        FormatDay(s[3]),
        FormatDay(s[4]));
-    result.Append("--------------------------------------------------------\n");
+    result.Append("\n");
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
     if (sombodyInTheOfiice)

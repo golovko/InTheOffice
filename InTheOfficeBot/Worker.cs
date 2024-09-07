@@ -1,5 +1,4 @@
 using InTheOfficeBot.Models;
-
 namespace InTheOfficeBot;
 
 public class Worker : BackgroundService
@@ -29,7 +28,7 @@ public class Worker : BackgroundService
         {
             try
             {
-                if (DateTime.Now >= _botConfiguration.SendDateTime)
+                if (Helpers.Helpers.IsCurrentDayAndTime(_botConfiguration.SendDateTime))
                 {
                     await _bot.SendPoll();
 
