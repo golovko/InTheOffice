@@ -7,6 +7,6 @@ partial class SqLiteContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
-    optionsBuilder.UseSqlite("Data Source=./data/botdatabase.db");
+    optionsBuilder.UseSqlite("Data Source=/app/data/botdatabase.db");
   }
 }
