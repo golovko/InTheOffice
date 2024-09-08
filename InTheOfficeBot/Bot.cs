@@ -42,8 +42,8 @@ class Bot
   async Task OnMessage(Message msg, UpdateType type)
   {
     long chatId = msg.Chat.Id;
-
-    switch (msg.Text)
+    var message = msg.Text.Split("@")[0];
+    switch (message)
     {
       case "/start":
         string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +

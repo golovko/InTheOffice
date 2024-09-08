@@ -18,24 +18,38 @@ public static class Helpers
     return false;
   }
   public static (string, int) GetWeekOrNextWeek()
-  {
+{
     var today = DateTime.Today;
     var currentWeek = ISOWeek.GetWeekOfYear(today);
 
-    if (today.DayOfWeek >= DayOfWeek.Friday || today.DayOfWeek == DayOfWeek.Sunday)
+    // Determine if it's Friday or later (Friday, Saturday, or Sunday)
+    if (today.DayOfWeek == DayOfWeek.Friday || today.DayOfWeek == DayOfWeek.Saturday || today.DayOfWeek == DayOfWeek.Sunday)
     {
-      currentWeek++;
+        // Check if it's the last week of the year, and handle wraparound to the next year
+        if (currentWeek == 52 && ISOWeek.GetYear(today) == today.Year)
+        {
+            currentWeek = 1;  // Move to week 1 of the next year
+            today = new DateTime(today.Year + 1, 1, 1);  // Move to next year
+        }
+        else
+        {
+            currentWeek++;  // Move to the next week
+        }
     }
 
-    var monday = GetDateForSpecificDayOfWeek(today.Year, currentWeek, DayOfWeek.Monday);
-    var friday = GetDateForSpecificDayOfWeek(today.Year, currentWeek, DayOfWeek.Friday);
+    // Get the year associated with the current ISO week number
+    int weekYear = ISOWeek.GetYear(today);
 
+    // Get the Monday and Friday of the calculated week
+    var monday = ISOWeek.ToDateTime(weekYear, currentWeek, DayOfWeek.Monday);
+    var friday = ISOWeek.ToDateTime(weekYear, currentWeek, DayOfWeek.Friday);
+
+    // Format the start and end dates (Monday and Friday) to "dd MMM"
     var startDate = monday.ToString("dd MMM", CultureInfo.InvariantCulture);
     var endDate = friday.ToString("dd MMM", CultureInfo.InvariantCulture);
 
     return ($"{startDate} - {endDate}", currentWeek);
-  }
-
+}
   public static DateTime ParseDayAndTime(string input)
   {
     var parts = input.Split(", ");
@@ -49,27 +63,5 @@ public static class Helpers
     var targetDate = today.AddDays(daysUntilNext);
 
     return new DateTime(targetDate.Year, targetDate.Month, targetDate.Day, hour, minute, 0);
-  }
-
-  public static DateTime GetDateForSpecificDayOfWeek(int year, int weekOfYear, DayOfWeek dayOfWeek)
-  {
-    // Get the first day of the year
-    var firstDayOfYear = new DateTime(year, 1, 1);
-
-    // Find the first Monday of the year
-    var daysOffset = DayOfWeek.Monday - firstDayOfYear.DayOfWeek;
-    var firstMonday = firstDayOfYear.AddDays(daysOffset);
-
-    // ISO 8601 week starts with the first Monday that belongs to that year
-    // If the first Monday is before the 1st of January, move to the next week
-    if (firstMonday.Year < year)
-    {
-      firstMonday = firstMonday.AddDays(7);
-    }
-
-    // Calculate the date of the desired day of the specified week
-    var desiredDate = firstMonday.AddDays((weekOfYear - 1) * 7 + (int)dayOfWeek - (int)DayOfWeek.Monday);
-
-    return desiredDate;
   }
 }
