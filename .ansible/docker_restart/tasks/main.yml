@@ -17,4 +17,6 @@
       - "{{ PORT }}:{{ PORT }}"
     env:
       BotToken: "{{ BOT_TOKEN }}"
+    volumes:
+      - ./data:/app/data 
 
