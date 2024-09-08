@@ -9,6 +9,7 @@
 
 - name: Run docker container
   docker_container:
+    user: root
     name: intheofficebot_container
     image: intheofficebot
     recreate: true
