@@ -18,5 +18,5 @@
     env:
       BotToken: "{{ BOT_TOKEN }}"
     volumes:
-      - ./data:/app/data 
+      - /home/ubuntu/data:/app/data 
 
