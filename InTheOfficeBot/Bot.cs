@@ -155,7 +155,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     {
       var user = _bot.GetChatMemberAsync(chatId, answer.UserId).Result;
       result.AppendFormat("{0,-10}{1}\n",
-            $"@{user.User.Username}",
+            $"<a href='tg://user?id={user.User.Id}'>{user.User.FirstName}</a>",
             FormatSelectedDays(answer.SelectedDays));
     }
     return result.ToString();
