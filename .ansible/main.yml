@@ -1,4 +1,4 @@
-- name: Deploy InTheOfiiceBot
+- name: Deploy InTheOfficeBot
   hosts: all
   remote_user: ubuntu
   vars:
