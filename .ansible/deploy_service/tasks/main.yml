@@ -8,14 +8,10 @@
       - systemd
     state: present
 
-- name: Install .NET SDK
-  shell: |
-    wget https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-{{ dotnet_sdk_version }}-linux-x64-binaries
-    sudo tar zxf dotnet-sdk-{{ dotnet_sdk_version }}.tar.gz -C /usr/share/dotnet
-    sudo ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
-  args:
-    chdir: /tmp
-  tags: install_dotnet_sdk
+# - name: Install .NET SDK
+#   apt:
+#     name: dotnet-sdk-8.0
+#     state: present
 
 - name: Clone the repository
   git:
