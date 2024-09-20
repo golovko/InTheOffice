@@ -3,7 +3,17 @@
   remote_user: ubuntu
   vars:
     dir: "{{ APP_PATH }}"
+    app_name: "InTheOfficeBot"
+    git_repo: "git@github.com:golovko/InTheOffice.git"
+    git_branch: "main"
+    dotnet_sdk_version: "8.0"
+    app_path: "{{ dir }}{{ app_name }}"
+    publish_folder: "/home/ubuntu/{{ app_name }}/publish"
+    service_name: "{{ app_name }}.service"
+    service_port: 5000
+    environment_vars:
+      - BotToken: "{{ lookup('env', 'BOT_TOKEN') }}"
   roles:
-      - git_pull
+    # - git_pull
       - deploy_service
     # - docker_restart
