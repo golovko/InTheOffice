@@ -1,24 +1,24 @@
-- name: Update APT and install prerequisites
-  apt:
-    update_cache: yes
-    name:
-      - git
-      - curl
-      - wget
-      - systemd
-    state: present
+# - name: Update APT and install prerequisites
+#   apt:
+#     update_cache: yes
+#     name:
+#       - git
+#       - curl
+#       - wget
+#       - systemd
+#     state: present
 
 # - name: Install .NET SDK
 #   apt:
 #     name: dotnet-sdk-8.0
 #     state: present
 
-- name: Clone the repository
-  git:
-    repo: "{{ git_repo }}"
-    dest: "{{ app_path }}"
-    version: "{{ git_branch }}"
-    force: yes
+# - name: Clone the repository
+#   git:
+#     repo: "{{ git_repo }}"
+#     dest: "{{ app_path }}"
+#     version: "{{ git_branch }}"
+#     force: yes
 
 - name: Publish the .NET app
   shell: |

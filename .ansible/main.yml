@@ -15,6 +15,6 @@
     environment_vars:
       - BotToken: "{{ lookup('env', 'BOT_TOKEN') }}"
   roles:
-    # - git_pull
-      - deploy_service
+    - git_pull
+    - deploy_service
     # - docker_restart
