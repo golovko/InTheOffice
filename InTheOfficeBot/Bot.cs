@@ -11,7 +11,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 class Bot
 {
-  private string _welcomeMessage = $"Hiya!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
+  private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
   private TelegramBotClient _bot;
   private CancellationTokenSource _cts = new CancellationTokenSource();
   private IRepository _repo;
