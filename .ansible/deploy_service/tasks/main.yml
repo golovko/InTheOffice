@@ -20,11 +20,11 @@
 #     version: "{{ git_branch }}"
 #     force: yes
 
-- name: Publish the .NET app
-  shell: |
-    dotnet publish -c Release -o {{ publish_folder }}
-  args:
-    chdir: "{{ app_path }}"
+# - name: Publish the .NET app
+#   shell: |
+#     dotnet publish -c Release -o {{ publish_folder }}
+#   args:
+#     chdir: "{{ app_path }}"
 
 - name: Create systemd service file for the .NET app
   copy:
