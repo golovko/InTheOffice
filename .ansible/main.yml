@@ -4,5 +4,6 @@
   vars:
     dir: "{{ APP_PATH }}"
   roles:
-    - git_pull
-    - docker_restart
+      - git_pull
+      - deploy_service
+    # - docker_restart

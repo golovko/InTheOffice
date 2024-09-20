@@ -1,3 +1,13 @@
+- name: Stop and remove old container if it exists
+  docker_container:
+    name: intheofficebot_container
+    state: absent
+
+- name: Remove old Docker image
+  docker_image:
+    name: intheofficebot
+    state: absent 
+
 - name: Build docker image
   docker_image:
     name: intheofficebot

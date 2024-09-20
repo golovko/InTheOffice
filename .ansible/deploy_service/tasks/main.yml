@@ -1,0 +1,88 @@
+---
+- hosts: all
+  become: true
+  vars:
+    app_name: "InTheOfficeBot"
+    git_repo: "git@github.com:golovko/InTheOffice.git"
+    git_branch: "main"
+    dotnet_sdk_version: "8.0"
+    app_path: "/home/ubuntu/{{ app_name }}"
+    publish_folder: "/home/ubuntu/{{ app_name }}/publish"
+    service_name: "{{ app_name }}.service"
+    service_port: 5000
+    environment_vars:
+      - BotToken: "{{ lookup('env', 'BOT_TOKEN') }}"
+
+  tasks:
+    - name: Update APT and install prerequisites
+      apt:
+        update_cache: yes
+        name:
+          - git
+          - curl
+          - wget
+          - systemd
+        state: present
+
+    - name: Install .NET SDK
+      shell: |
+        wget https://dotnet.microsoft.com/download/dotnet/thank-you/sdk-{{ dotnet_sdk_version }}-linux-x64-binaries
+        sudo tar zxf dotnet-sdk-{{ dotnet_sdk_version }}.tar.gz -C /usr/share/dotnet
+        sudo ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet
+      args:
+        chdir: /tmp
+      tags: install_dotnet_sdk
+
+    # - name: Clone the repository
+    #   git:
+    #     repo: "{{ git_repo }}"
+    #     dest: "{{ app_path }}"
+    #     version: "{{ git_branch }}"
+    #     force: yes
+
+    - name: Publish the .NET app
+      shell: |
+        dotnet publish -c Release -o {{ publish_folder }}
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Create systemd service file for the .NET app
+      copy:
+        dest: "/etc/systemd/system/{{ service_name }}"
+        content: |
+          [Unit]
+          Description={{ app_name }} .NET App
+          After=network.target
+
+          [Service]
+          WorkingDirectory={{ publish_folder }}
+          ExecStart=/usr/bin/dotnet {{ publish_folder }}/{{ app_name }}.dll
+          Restart=always
+          RestartSec=10
+          KillSignal=SIGINT
+          SyslogIdentifier=dotnet-{{ app_name }}
+          User=ubuntu
+          Environment=ASPNETCORE_ENVIRONMENT=Production
+          {% for var in environment_vars %}
+          Environment={{ var.key }}={{ var.value }}
+          {% endfor %}
+          Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd to recognize new service
+      systemd:
+        daemon_reload: yes
+
+    - name: Start and enable the .NET service
+      systemd:
+        name: "{{ service_name }}"
+        enabled: yes
+        state: started
+
+    - name: Open firewall for app service (optional)
+      ufw:
+        rule: allow
+        port: "{{ service_port }}"
+        proto: tcp
