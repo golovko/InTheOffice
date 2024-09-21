@@ -26,4 +26,4 @@ jobs:
             -e APP_PATH=${{vars.APP_PATH}}
             -e BOT_TOKEN=${{secrets.BOT_TOKEN}}
         env:
-          BOT_TOKEN=${{secrets.BOT_TOKEN}}
+          BOT_TOKEN: ${{secrets.BOT_TOKEN}}
