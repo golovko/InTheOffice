@@ -9,7 +9,7 @@
     git_branch: "main"
     dotnet_sdk_version: "8.0"
     app_path: "{{ dir }}{{ app_name }}"
-    publish_folder: "/home/ubuntu/{{ app_name }}/publish"
+    publish_folder: "{{ app_path }}/publish"
     service_name: "{{ app_name }}.service"
     service_port: 5000
     environment_vars:

@@ -43,6 +43,9 @@
       SyslogIdentifier=dotnet-{{ app_name }}
       User=ubuntu
       Environment=ASPNETCORE_ENVIRONMENT=Production
+      {% for var in environment_vars %}
+      Environment={{ var.key }}={{ var.value }}
+      {% endfor %}
       Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
 
       [Install]
