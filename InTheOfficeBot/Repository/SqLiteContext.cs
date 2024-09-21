@@ -7,6 +7,7 @@ partial class SqLiteContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
-    optionsBuilder.UseSqlite("Data Source=~/data/botdatabase.db");
+    var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+    optionsBuilder.UseSqlite($"Data Source={Path.Combine(homeDir, "data", "botdatabase.db")}");
   }
 }
