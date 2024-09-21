@@ -21,8 +21,6 @@ jobs:
             -e GITHUB_REPO=${{github.repository}}
             -e PORT=${{vars.PORT}}   
             -e APP_PATH=${{vars.APP_PATH}}
-            -e BOT_TOKEN=${{secrets.BOT_TOKEN}}
-            -e CONNECTION_STRING=${{vars.CONNECTION_STRING}}
         env:
           BOT_TOKEN: ${{secrets.BOT_TOKEN}}
           CONNECTION_STRING: ${{vars.CONNECTION_STRING}}
