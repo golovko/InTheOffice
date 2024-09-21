@@ -25,7 +25,7 @@ public class SqLiteContext : DbContext
         throw new InvalidOperationException("Connection string is not set.");
       }
 
-      optionsBuilder.UseSqlite(_connectionString);
+      optionsBuilder.UseSqlite($"Data Source={_connectionString}");
     }
   }
 }
