@@ -23,11 +23,19 @@
       # - role: deploy_service
     # - docker_restart
   tasks:
+    - name: Clone the repository
+      git:
+        repo: "{{ git_repo }}"
+        dest: "{{ app_path }}"
+        version: "{{ git_branch }}"
+        force: yes
+
     - name: Publish the .NET app
       shell: |
+        dotnet restore
         dotnet publish -c Release -o {{ publish_folder }}
       args:
-        chdir: "{{ app_path }}/InTheOfficeBot"
+        chdir: "{{ app_path }}"
 
     - name: Create systemd service file for the .NET app
       copy:

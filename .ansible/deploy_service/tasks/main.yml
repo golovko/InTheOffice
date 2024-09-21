@@ -13,13 +13,13 @@
 #     name: dotnet-sdk-8.0
 #     state: present
 # 
-# - name: Clone the repository
-#   git:
-#     repo: "{{ git_repo }}"
-#     dest: "{{ app_path }}"
-#     version: "{{ git_branch }}"
-#     force: yes
-# 
+- name: Clone the repository
+  git:
+    repo: "{{ git_repo }}"
+    dest: "{{ app_path }}"
+    version: "{{ git_branch }}"
+    force: yes
+
 - name: Publish the .NET app
   shell: |
     dotnet restore
