@@ -6,7 +6,7 @@
     ansible_python_interpreter: /usr/bin/python3.12 
     dir: "{{ APP_PATH }}"
     app_name: "InTheOfficeBot"
-    git_repo: "git@github.com:golovko/InTheOffice.git"
+    git_repo: "https://github.com/golovko/InTheOffice.git"
     git_branch: "main"
     dotnet_sdk_version: "8.0"
     app_path: "{{ dir }}/InTheOffice"
@@ -23,6 +23,12 @@
       # - role: deploy_service
     # - docker_restart
   tasks:
+    # - name: Add GitHub to known hosts
+    #   known_hosts:
+    #     path: /home/ubuntu/.ssh/known_hosts
+    #     name: github.com
+    #     key: "{{ lookup('pipe', 'ssh-keyscan -t rsa github.com') }}"
+      
     - name: Ensure the app directory exists
       file:
         path: "{{ app_path }}"
