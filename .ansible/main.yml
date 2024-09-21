@@ -13,8 +13,9 @@
     service_name: "{{ app_name }}.service"
     service_port: 5000
     environment_vars:
-      - BotToken: "{{ lookup('env', 'BOT_TOKEN') }}"
-  roles:
+      - key: "BotToken"
+        value: "{{ lookup('env', 'BOT_TOKEN') }}"
+    roles:
     # - git_pull
     - deploy_service
     # - docker_restart
