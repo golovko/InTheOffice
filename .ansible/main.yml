@@ -13,9 +13,9 @@
     service_name: "{{ app_name }}.service"
     service_port: 5000
     environment_vars:
-      - key: "BotToken"
+      - key: "BOT_TOKEN"
         value: "{{ lookup('env', 'BOT_TOKEN') }}"
-      - key: "ConnectionString"
+      - key: "CONNECTION_STRING"
         value: "{{ lookup('env', 'CONNECTION_STRING') }}"
     roles:
     # - git_pull
