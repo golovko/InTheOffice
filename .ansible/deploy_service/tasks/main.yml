@@ -13,12 +13,17 @@
 #     name: dotnet-sdk-8.0
 #     state: present
 # 
-- name: Clone the repository
+- name: Ensure the app directory exists
+  file:
+    path: "{{ app_path }}"
+    state: directory
+    
+- name: Clone or pull the repository
   git:
     repo: "{{ git_repo }}"
     dest: "{{ app_path }}"
     version: "{{ git_branch }}"
-    force: yes
+    update: yes
 
 - name: Publish the .NET app
   shell: |
@@ -66,4 +71,4 @@
   ufw:
     rule: allow
     port: "{{ service_port }}"
-    proto: tcp
+    proto: tcp  
