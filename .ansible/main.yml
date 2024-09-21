@@ -1,5 +1,6 @@
 - name: Deploy InTheOfficeBot
   hosts: all
+  become: true
   remote_user: ubuntu
   vars:
     dir: "{{ APP_PATH }}"
