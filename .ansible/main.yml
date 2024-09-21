@@ -20,5 +20,5 @@
         value: "{{ lookup('env', 'CONNECTION_STRING') }}"
     roles:
     # - git_pull
-    - deploy_service
+      - deploy_service
     # - docker_restart
