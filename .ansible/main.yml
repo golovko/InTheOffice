@@ -27,7 +27,7 @@
       shell: |
         dotnet publish -c Release -o {{ publish_folder }}
       args:
-        chdir: "{{ app_path/InTheOfficeBot }}"
+        chdir: "{{ app_path }}/InTheOfficeBot"
 
     - name: Create systemd service file for the .NET app
       copy:
