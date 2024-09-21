@@ -1,6 +1,6 @@
 using InTheOfficeBot.Models;
 namespace InTheOfficeBot.Repository;
-interface IRepository
+public interface IRepository
 {
   void SaveAnswer(Answer answer);
   IEnumerable<Answer> GetAnswersByUser(long chatId, long userId);

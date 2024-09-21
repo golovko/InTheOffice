@@ -1,12 +1,12 @@
 using InTheOfficeBot.Models;
 
 namespace InTheOfficeBot.Repository;
-class AnswersRepository : IRepository
+public class AnswersRepository : IRepository
 {
   private SqLiteContext _db;
-  public AnswersRepository()
+  public AnswersRepository(SqLiteContext db)
   {
-    _db = new SqLiteContext();
+    _db = db ?? throw new ArgumentNullException(nameof(db));
   }
 
   public IEnumerable<Answer> GetAnswersByUser(long chatId, long userId)

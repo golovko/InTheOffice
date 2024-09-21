@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InTheOfficeBot.Models;
-class Answer
+public class Answer
 {
   [Key]
   [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

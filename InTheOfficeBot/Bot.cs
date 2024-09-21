@@ -9,7 +9,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
-class Bot
+public class Bot
 {
   private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
   private TelegramBotClient _bot;
@@ -19,10 +19,10 @@ class Bot
   private ILogger<Worker> _logger;
   private BotConfiguration _config;
 
-  public Bot(ILogger<Worker> logger, BotConfiguration configuration)
+  public Bot(ILogger<Worker> logger, BotConfiguration configuration, IRepository repo)
   {
     this._bot = new TelegramBotClient(configuration.BotToken, cancellationToken: _cts.Token);
-    this._repo = new AnswersRepository();
+    this._repo = repo ?? throw new ArgumentNullException(nameof(repo));
     this._logger = logger;
     this._config = configuration;
   }
@@ -135,7 +135,7 @@ class Bot
   {
     var result = new StringBuilder();
     var s = SelectedDays(chatId);
-    var sombodyInTheOfiice = false;
+    var somebodyInTheOffice = false;
     result.AppendFormat(@"<b>Days covered</b>:
 Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 ",
@@ -147,7 +147,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     result.Append("\n");
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
-    if (sombodyInTheOfiice)
+    if (somebodyInTheOffice)
     {
       result.Append("<b>Who is in the office:</b>\n");
     }
