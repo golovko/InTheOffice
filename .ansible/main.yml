@@ -18,7 +18,54 @@
         value: "{{ lookup('env', 'BOT_TOKEN') }}"
       - key: "CONNECTION_STRING"
         value: "{{ lookup('env', 'CONNECTION_STRING') }}"
-    roles:
+    # roles:
     # - git_pull
-      - deploy_service
+      # - role: deploy_service
     # - docker_restart
+  tasks:
+    - name: Publish the .NET app
+      shell: |
+        dotnet publish -c Release -o {{ publish_folder }}
+      args:
+        chdir: "{{ app_path }}"
+
+    - name: Create systemd service file for the .NET app
+      copy:
+        dest: "/etc/systemd/system/{{ service_name }}"
+        content: |
+          [Unit]
+          Description={{ app_name }} .NET App
+          After=network.target
+
+          [Service]
+          WorkingDirectory={{ publish_folder }}
+          ExecStart=/usr/bin/dotnet {{ publish_folder }}/{{ app_name }}.dll
+          Restart=always
+          RestartSec=10
+          KillSignal=SIGINT
+          SyslogIdentifier=dotnet-{{ app_name }}
+          User=ubuntu
+          Environment=ASPNETCORE_ENVIRONMENT=Production
+          {% for var in environment_vars %}
+          Environment={{ var.key }}={{ var.value }}
+          {% endfor %}
+          Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd to recognize new service
+      systemd:
+        daemon_reload: yes
+
+    - name: Start and enable the .NET service
+      systemd:
+        name: "{{ service_name }}"
+        enabled: yes
+        state: started
+
+    - name: Open firewall for app service (optional)
+      ufw:
+        rule: allow
+        port: "{{ service_port }}"
+        proto: tcp  
