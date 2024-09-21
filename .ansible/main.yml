@@ -18,7 +18,8 @@
         value: "{{ lookup('env', 'BOT_TOKEN') }}"
       - key: "CONNECTION_STRING"
         value: "{{ lookup('env', 'CONNECTION_STRING') }}"
-    roles:
-    # - git_pull
-      - role: deploy_service
-    # - docker_restart
+  roles:
+  # - git_pull
+     - role: deploy_service
+  # - docker_restart
+  
