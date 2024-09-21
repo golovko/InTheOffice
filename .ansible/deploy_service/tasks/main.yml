@@ -22,6 +22,7 @@
 # 
 - name: Publish the .NET app
   shell: |
+    dotnet restore
     dotnet publish -c Release -o {{ publish_folder }}
   args:
     chdir: "{{ app_path }}"
