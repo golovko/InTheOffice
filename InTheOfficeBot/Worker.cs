@@ -44,12 +44,10 @@ public class Worker : BackgroundService
 
                     if (delayTime < TimeSpan.Zero)
                     {
-                        delayTime = TimeSpan.FromSeconds(1);
+                        delayTime = TimeSpan.FromMinutes(1);
                     }
 
-                    _logger.LogInformation(
-                        $"Waiting for the next scheduled time: {_botConfiguration.SendDateTime}, delay: {delayTime.TotalSeconds}s");
-                    await Task.Delay(delayTime, stoppingToken);
+                    await Task.Delay(TimeSpan.FromMinutes(Math.Min(1, delayTime.TotalMinutes)), stoppingToken);
                 }
             }
             catch (TaskCanceledException)
