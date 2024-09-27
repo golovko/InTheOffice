@@ -11,11 +11,11 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 public class Bot
 {
-  private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{Helpers.GetWeekOrNextWeek().Item1}</b>";
+  private (string range, int number) _week => Helpers.GetWeekOrNextWeek();
+  private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{_week.range}</b>";
   private TelegramBotClient _bot;
-  private CancellationTokenSource _cts = new CancellationTokenSource();
+  private CancellationTokenSource _cts = new ();
   private IRepository _repo;
-  private (string range, int number) _week = Helpers.GetWeekOrNextWeek();
   private ILogger<Worker> _logger;
   private BotConfiguration _config;
 
