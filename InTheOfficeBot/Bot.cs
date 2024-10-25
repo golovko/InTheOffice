@@ -14,7 +14,7 @@ public class Bot
   private (string range, int number) _week => Helpers.GetWeekOrNextWeek();
   private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{_week.range}</b>";
   private TelegramBotClient _bot;
-  private CancellationTokenSource _cts = new ();
+  private CancellationTokenSource _cts = new();
   private IRepository _repo;
   private ILogger<Worker> _logger;
   private BotConfiguration _config;
@@ -96,10 +96,17 @@ public class Bot
     var chatIds = this._repo.GetChatIds();
     foreach (var chatId in chatIds)
     {
-      this._logger.LogInformation("Sending a message into the chat: " + chatId);
+      try
+      {
+        this._logger.LogInformation("Sending a message into the chat: " + chatId);
+        await this._bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+        await SendReplyKeyboard(chatId);
+      }
+      catch (System.Exception e)
+      {
 
-      await this._bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
-      await SendReplyKeyboard(chatId);
+        this._logger.LogInformation("Can't send an update message to a chat, get an error: " + e.InnerException);
+      }
     }
   }
 
