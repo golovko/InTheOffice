@@ -59,7 +59,11 @@ public class Bot
 
       case "/poll":
         await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
-        await SendReplyKeyboard(chatId);
+        var sentMsg = await SendReplyKeyboard(chatId);
+        //PinMessage(sentMsg, chatId);
+        await _bot.UnpinAllChatMessages(chatId);
+        await _bot.PinChatMessageAsync(chatId, sentMsg.MessageId);
+
         break;
     }
   }
@@ -72,7 +76,6 @@ public class Bot
     }
 
     await this._bot.AnswerCallbackQueryAsync(query.Id, $"You picked {query.Data}");
-
     var day = Enum.Parse<DayOfWeek>(query.Data!, true);
     var chatId = query.Message!.Chat.Id;
     var messageId = query.Message.MessageId;
@@ -154,7 +157,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     foreach (var answer in answersByWeek)
     {
       var user = _bot.GetChatMemberAsync(chatId, answer.UserId).Result;
-      result.AppendFormat("{0,-10}{1}\n",
+      result.AppendFormat("{0,-10}\t \t{1}\n",
             $"<a href='tg://user?id={user.User.Id}'>{user.User.FirstName}</a>",
             FormatSelectedDays(answer.SelectedDays));
     }
@@ -177,4 +180,11 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
   {
     return isSelected ? "✅" : "❌";
   }
+
+  async void PinMessage(Message msg, long chatId)
+  {
+    await _bot.PinChatMessageAsync(chatId, msg.MessageId);
+
+  }
+  
 }
