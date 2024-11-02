@@ -142,7 +142,6 @@ public class Bot
   {
     var result = new StringBuilder();
     var s = SelectedDays(chatId);
-    var somebodyInTheOffice = false;
     result.AppendFormat(@"<b>Days covered</b>:
 Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 ",
@@ -154,16 +153,25 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     result.Append("\n");
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
-    if (somebodyInTheOffice)
+
+    if (answersByWeek.Count() > 0)
     {
-      result.Append("<b>Who is in the office:</b>\n");
-    }
-    foreach (var answer in answersByWeek)
-    {
-      var user = _bot.GetChatMemberAsync(chatId, answer.UserId).Result;
-      result.AppendFormat("{0,-10}{1}\n",
-            $"<a href='tg://user?id={user.User.Id}'>{user.User.FirstName}</a>",
-            FormatSelectedDays(answer.SelectedDays));
+      List<ChatMember>? users = new();
+
+      foreach (var answer in answersByWeek)
+      {
+        users.Add(_bot.GetChatMemberAsync(chatId, answer.UserId).Result);
+      }
+
+      var longestNameLength = users.OrderByDescending(s => s.User.FirstName.Length).FirstOrDefault().User.FirstName.Length;
+
+      foreach (var answer in answersByWeek)
+      {
+        var user = users.FirstOrDefault(u => u.User.Id == answer.UserId);
+        result.AppendFormat("{0,-10}{1}\n",
+              $"<a href='tg://user?id={user.User.Id}'><code>{user.User.FirstName + new string(' ', longestNameLength - user.User.FirstName.Length)}</code></a>",
+              FormatSelectedDays(answer.SelectedDays));
+      }
     }
     return result.ToString();
   }
