@@ -85,7 +85,7 @@ public class Bot
 
     this._repo.SaveAnswer(latestAnswer);
 
-    var updatedText = ShowAnswers(chatId, _week.number);
+    var updatedText = await ShowAnswers(chatId, _week.number);
     var replyMarkup = InlineKeyboard();
 
     await this._bot.EditMessageTextAsync(chatId, messageId, updatedText, replyMarkup: replyMarkup, parseMode: ParseMode.Html);
@@ -112,7 +112,7 @@ public class Bot
 
   async Task<Message> SendReplyKeyboard(long chatId)
   {
-    return await this._bot.SendTextMessageAsync(chatId, ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
+    return await this._bot.SendTextMessageAsync(chatId, await ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
   }
 
   InlineKeyboardMarkup InlineKeyboard()
@@ -138,7 +138,7 @@ public class Bot
     return coveredDays;
   }
 
-  string ShowAnswers(long chatId, int week)
+  async Task<string> ShowAnswers(long chatId, int week)
   {
     var result = new StringBuilder();
     var s = SelectedDays(chatId);
@@ -160,7 +160,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 
       foreach (var answer in answersByWeek)
       {
-        users.Add(_bot.GetChatMemberAsync(chatId, answer.UserId).Result);
+        users.Add(await _bot.GetChatMemberAsync(chatId, answer.UserId));
       }
 
       var longestNameLength = users.OrderByDescending(s => s.User.FirstName.Length).FirstOrDefault().User.FirstName.Length;
