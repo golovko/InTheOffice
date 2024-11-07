@@ -53,7 +53,7 @@ public class Bot
         break;
 
       case "/check":
-        string checkMessage = $"<b>Week: {_week.range}</b>\n{ShowAnswers(msg.Chat.Id, _week.number)}";
+        string checkMessage = $"<b>Week: {_week.range}</b>\n{await ShowAnswers(msg.Chat.Id, _week.number)}";
         await _bot.SendTextMessageAsync(chatId, checkMessage, parseMode: ParseMode.Html);
         break;
 
