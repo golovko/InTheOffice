@@ -39,6 +39,7 @@ public class AnswersRepository : IRepository
     else
     {
       result.SelectedDays = answer.SelectedDays;
+      result.FirstName = answer.FirstName;
     }
     _db.SaveChanges();
   }

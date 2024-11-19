@@ -76,9 +76,12 @@ public class Bot
     var day = Enum.Parse<DayOfWeek>(query.Data!, true);
     var chatId = query.Message!.Chat.Id;
     var messageId = query.Message.MessageId;
-
+    var firstName = query.From.FirstName;
     var userId = query.From.Id;
-    var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new Answer(chatId, _week.number, userId);
+    var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new Answer(chatId, _week.number, userId, firstName);
+    if(latestAnswer != null){
+      latestAnswer.FirstName = firstName;
+    }
 
     var dayIndex = (int)day - 1;
     latestAnswer.SelectedDays[dayIndex] = !latestAnswer.SelectedDays[dayIndex];
@@ -153,30 +156,24 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
 
-    if (answersByWeek.Count() > 0)
+    if (answersByWeek.Any())
     {
-      List<ChatMember>? users = new();
-
+      var longestNameLength = answersByWeek.OrderByDescending(s => s.FirstName?.Length).FirstOrDefault().FirstName.Length;
       foreach (var answer in answersByWeek)
       {
-        try
-        {
-          users.Add(await _bot.GetChatMemberAsync(chatId, answer.UserId));
+        if(string.IsNullOrEmpty(answer.FirstName)){
+            try
+            {
+              var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
+              answer.FirstName = chatMember?.User.FirstName ?? "NoName";
+            }
+            catch
+            {
+          
+            }
         }
-        catch (System.Exception e)
-        {
-          this._logger.LogInformation("Can't get chat member data, get an error: " + e.InnerException);
-        }
-
-      }
-
-      var longestNameLength = users.OrderByDescending(s => s.User.FirstName.Length).FirstOrDefault().User.FirstName.Length;
-
-      foreach (var answer in answersByWeek)
-      {
-        var user = users.FirstOrDefault(u => u.User.Id == answer.UserId);
         result.AppendFormat("{0,-10}{1}\n",
-              $"<a href='tg://user?id={user.User.Id}'><code>{user.User.FirstName + new string(' ', longestNameLength - user.User.FirstName.Length)}</code></a>",
+              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName + new string(' ', longestNameLength - answer.FirstName.Length)}</code></a>",
               FormatSelectedDays(answer.SelectedDays));
       }
     }
