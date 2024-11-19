@@ -104,7 +104,6 @@ public class Bot
       }
       catch (System.Exception e)
       {
-
         this._logger.LogInformation("Can't send an update message to a chat, get an error: " + e.InnerException);
       }
     }
@@ -160,7 +159,15 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 
       foreach (var answer in answersByWeek)
       {
-        users.Add(await _bot.GetChatMemberAsync(chatId, answer.UserId));
+        try
+        {
+          users.Add(await _bot.GetChatMemberAsync(chatId, answer.UserId));
+        }
+        catch (System.Exception e)
+        {
+          this._logger.LogInformation("Can't get chat member data, get an error: " + e.InnerException);
+        }
+
       }
 
       var longestNameLength = users.OrderByDescending(s => s.User.FirstName.Length).FirstOrDefault().User.FirstName.Length;
