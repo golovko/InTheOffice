@@ -3,6 +3,7 @@ using InTheOfficeBot;
 using InTheOfficeBot.Helpers;
 using InTheOfficeBot.Models;
 using InTheOfficeBot.Repository;
+using Microsoft.VisualBasic;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -79,7 +80,8 @@ public class Bot
     var firstName = query.From.FirstName;
     var userId = query.From.Id;
     var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new Answer(chatId, _week.number, userId, firstName);
-    if(latestAnswer != null){
+    if (latestAnswer != null)
+    {
       latestAnswer.FirstName = firstName;
     }
 
@@ -158,23 +160,23 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 
     if (answersByWeek.Any())
     {
-      var longestNameLength = answersByWeek.OrderByDescending(s => s.FirstName?.Length).FirstOrDefault().FirstName.Length;
       foreach (var answer in answersByWeek)
       {
-        if(string.IsNullOrEmpty(answer.FirstName) || answer.FirstName == "FirstName"){
-            try
-            {
-              var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
-              answer.FirstName = chatMember.User.FirstName;
-              this._repo.SaveAnswer(answer);
-            }
-            catch
-            {
-              answer.FirstName = "NoName";
-            }
+        if (string.IsNullOrEmpty(answer.FirstName) || answer.FirstName == "FirstName")
+        {
+          try
+          {
+            var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
+            answer.FirstName = chatMember.User.FirstName;
+            this._repo.SaveAnswer(answer);
+          }
+          catch
+          {
+            answer.FirstName = "NoName";
+          }
         }
         result.AppendFormat("{0,-10}{1}\n",
-              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName + new string(' ', Math.Abs(longestNameLength - answer.FirstName.Length))}</code></a>",
+              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName.PadRight(9).Substring(0, 9)}</code></a>",
               FormatSelectedDays(answer.SelectedDays));
       }
     }
