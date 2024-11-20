@@ -161,19 +161,20 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
       var longestNameLength = answersByWeek.OrderByDescending(s => s.FirstName?.Length).FirstOrDefault().FirstName.Length;
       foreach (var answer in answersByWeek)
       {
-        if(string.IsNullOrEmpty(answer.FirstName)){
+        if(string.IsNullOrEmpty(answer.FirstName) || answer.FirstName == "FirstName"){
             try
             {
               var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
-              answer.FirstName = chatMember?.User.FirstName ?? "NoName";
+              answer.FirstName = chatMember.User.FirstName;
+              this._repo.SaveAnswer(answer);
             }
             catch
             {
-          
+              answer.FirstName = "NoName";
             }
         }
         result.AppendFormat("{0,-10}{1}\n",
-              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName + new string(' ', longestNameLength - answer.FirstName.Length)}</code></a>",
+              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName + new string(' ', Math.Abs(longestNameLength - answer.FirstName.Length))}</code></a>",
               FormatSelectedDays(answer.SelectedDays));
       }
     }
