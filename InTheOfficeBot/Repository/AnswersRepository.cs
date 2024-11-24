@@ -16,7 +16,7 @@ public class AnswersRepository : IRepository
 
   public IEnumerable<Answer> GetAnswersByWeek(long chatId, int weekOfTheYear)
   {
-    return _db.Answers.Where(a => a.ChatId == chatId && a.WeekOfTheYear == weekOfTheYear);
+    return _db.Answers.Where(a => a.ChatId == chatId && a.WeekOfTheYear == weekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
   }
 
   public long[] GetChatIds()
@@ -26,7 +26,7 @@ public class AnswersRepository : IRepository
 
   public Answer? GetLatestUserAnswer(long chatId, int weekOfTheYear, long userId)
   {
-    return _db.Answers.FirstOrDefault(a => a.ChatId == chatId && a.UserId == userId && a.WeekOfTheYear == weekOfTheYear);
+    return _db.Answers.FirstOrDefault(a => a.ChatId == chatId && a.UserId == userId && a.WeekOfTheYear == weekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
   }
 
   public void SaveAnswer(Answer answer)
