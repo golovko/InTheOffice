@@ -9,7 +9,7 @@ public class Worker : BackgroundService
     private Bot _bot;
     private readonly BotConfiguration _botConfiguration;
 
-    public Worker(ILogger<Worker> logger, BotConfiguration botConfiguration, AnswersRepository repo)
+    public Worker(ILogger<Worker> logger, BotConfiguration botConfiguration, Repository.Repository repo)
     {
         _logger = logger;
         _botConfiguration = botConfiguration;

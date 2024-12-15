@@ -13,7 +13,7 @@ var botConfiguration = new BotConfiguration
 };
 builder.Services.AddSingleton(botConfiguration);
 builder.Services.AddTransient<SqLiteContext>();
-builder.Services.AddTransient<AnswersRepository>();
+builder.Services.AddTransient<Repository>();
 builder.Services.AddHostedService<Worker>();
 
 var host = builder.Build();

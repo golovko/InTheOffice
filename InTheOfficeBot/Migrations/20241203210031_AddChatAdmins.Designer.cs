@@ -3,6 +3,7 @@ using System;
 using InTheOfficeBot.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InTheOfficeBot.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20241203210031_AddChatAdmins")]
+    partial class AddChatAdmins
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -57,9 +60,6 @@ namespace InTheOfficeBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AdminIds")
-                        .HasColumnType("TEXT");
-
                     b.Property<long>("ChatId")
                         .HasColumnType("INTEGER");
 
@@ -92,6 +92,9 @@ namespace InTheOfficeBot.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ChatId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -104,6 +107,8 @@ namespace InTheOfficeBot.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ChatId");
 
                     b.ToTable("Users");
                 });
@@ -125,6 +130,18 @@ namespace InTheOfficeBot.Migrations
                     b.Navigation("Chat");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InTheOfficeBot.Models.User", b =>
+                {
+                    b.HasOne("InTheOfficeBot.Models.Chat", null)
+                        .WithMany("Admins")
+                        .HasForeignKey("ChatId");
+                });
+
+            modelBuilder.Entity("InTheOfficeBot.Models.Chat", b =>
+                {
+                    b.Navigation("Admins");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,7 +3,6 @@ using InTheOfficeBot;
 using InTheOfficeBot.Helpers;
 using InTheOfficeBot.Models;
 using InTheOfficeBot.Repository;
-using Microsoft.VisualBasic;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -43,38 +42,126 @@ public class Bot
   async Task OnMessage(Message msg, UpdateType type)
   {
     long chatId = msg.Chat.Id;
-    var message = msg.Text.Split("@")[0];
-    switch (message)
+
+    var chat = this._repo.GetChat(msg.Chat.Id);
+    if (chat == null)
     {
-      case "/start":
-        string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
-                              "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
-                              "Use the /check command to see the latest answers.";
-        await _bot.SendTextMessageAsync(chatId, startMessage, parseMode: ParseMode.Html);
-        break;
+      chat = new()
+      {
+        ChatId = msg.Chat.Id,
+        ChatName = msg.Chat.FirstName ?? msg.Chat.Title ?? msg.Chat.LastName,
+      };
 
-      case "/check":
-        string checkMessage = $"<b>Week: {_week.range}</b>\n{await ShowAnswers(msg.Chat.Id, _week.number)}";
-        await _bot.SendTextMessageAsync(chatId, checkMessage, parseMode: ParseMode.Html);
-        break;
+      this._repo.SaveChat(chat);
+    }
 
-      case "/poll":
-        await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
-        var sentMsg = await SendReplyKeyboard(chatId);
-        //PinMessage(sentMsg, chatId);
-        await _bot.UnpinAllChatMessages(chatId);
-        await _bot.PinChatMessageAsync(chatId, sentMsg.MessageId);
+    var user = _repo.GetUser(msg.From.Id);
+    if (user == null)
+    {
+      user = _repo.SaveUser(new()
+      {
+        UserId = msg.From.Id,
+        FirstName = msg.From.FirstName,
+        Nickname = msg.From.Username,
+      });
+    }
 
-        break;
+    var message = msg.Text.Split("@")[0];
+
+    if (msg.Chat.Type == ChatType.Private)
+    {
+      switch (message)
+      {
+        case "/set":
+          var adminChats = _repo.GetChatsWhereUserIsAdmin(user);
+          if (adminChats.Any())
+          {
+
+            var adminChatsNames = new InlineKeyboardMarkup();
+            foreach (var adminChat in adminChats)
+            {
+              adminChatsNames.AddButton(adminChat.ChatName);
+            }
+            await this._bot.SendTextMessageAsync(chatId, "Select chat to manage", replyMarkup: new InlineKeyboardMarkup().AddButtons(string.Join(", ", adminChatsNames)), parseMode: ParseMode.Html);
+          }
+
+          await _bot.SendTextMessageAsync(chatId, "You don't have chats to manage", parseMode: ParseMode.Html);
+
+          break;
+      }
+    }
+    else
+    {
+      switch (message)
+      {
+        case "/start":
+          string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
+                                "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
+                                "Use the /check command to see the latest answers.";
+          await _bot.SendTextMessageAsync(chatId, startMessage, parseMode: ParseMode.Html);
+          break;
+
+        case "/check":
+          string checkMessage = $"<b>Week: {_week.range}</b>\n{await ShowAnswers(msg.Chat.Id, _week.number)}";
+          await _bot.SendTextMessageAsync(chatId, checkMessage, parseMode: ParseMode.Html);
+          break;
+
+        case "/poll":
+          await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+          var sentMsg = await SendReplyKeyboard(chatId);
+          // PinMessage(sentMsg, chatId);
+          // await _bot.UnpinChatMessageAsync(chatId, 123);
+          //await _bot.PinChatMessageAsync(chatId, sentMsg.MessageId);
+          break;
+
+        case "/stop":
+          //TODO: implement unsubscribing
+          break;
+      }
     }
   }
 
   async Task OnUpdate(Update update)
   {
+
     if (update.CallbackQuery is not { } query)
     {
       return;
     }
+
+    var user = this._repo.GetUser(query.From.Id);
+    if (user == null)
+    {
+      user = this._repo.SaveUser(new()
+      {
+        UserId = query.From.Id,
+        FirstName = query.From.FirstName,
+        Nickname = query.From.Username,
+      });
+    }
+
+    var chat = this._repo.GetChat(query.Message!.Chat.Id);
+    if (chat == null)
+    {
+      chat = new()
+      {
+        ChatId = query.Message.Chat.Id,
+        ChatName = query.Message.Chat.FirstName ?? query.Message.Chat.Title ?? query.Message.Chat.LastName,
+      };
+      this._repo.SaveChat(chat);
+    }
+
+    var admins = await _bot.GetChatAdministratorsAsync(query.Message.Chat.Id);
+    foreach (var admin in admins)
+    {
+      var chatAdmin = new InTheOfficeBot.Models.User { UserId = admin.User.Id, FirstName = admin.User.FirstName, Nickname = admin.User.Username };
+      if(chat.AdminIds is null || !chat.AdminIds.Contains(chatAdmin.Id))
+      {
+        chat.AddAdmin(chatAdmin);
+      }
+    }
+
+    this._repo.UpdateChat(chat);
 
     await this._bot.AnswerCallbackQueryAsync(query.Id, $"You picked {query.Data}");
     var day = Enum.Parse<DayOfWeek>(query.Data!, true);
@@ -82,11 +169,9 @@ public class Bot
     var messageId = query.Message.MessageId;
     var firstName = query.From.FirstName;
     var userId = query.From.Id;
-    var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new Answer(chatId, _week.number, userId, firstName);
-    if (latestAnswer != null)
-    {
-      latestAnswer.FirstName = firstName;
-    }
+    var latestAnswer = _repo.GetLatestUserAnswer(chatId, _week.number, userId) ?? new() { Chat = chat, WeekOfTheYear = _week.number, User = user };
+    latestAnswer.User.FirstName = firstName;
+    latestAnswer.MessageId = messageId;
 
     var dayIndex = (int)day - 1;
     latestAnswer.SelectedDays[dayIndex] = !latestAnswer.SelectedDays[dayIndex];
@@ -94,7 +179,7 @@ public class Bot
     this._repo.SaveAnswer(latestAnswer);
 
     var updatedText = await ShowAnswers(chatId, _week.number);
-    var replyMarkup = InlineKeyboard();
+    var replyMarkup = MessageHelpers.DaysKeyboard();
 
     await this._bot.EditMessageTextAsync(chatId, messageId, updatedText, replyMarkup: replyMarkup, parseMode: ParseMode.Html);
   }
@@ -119,16 +204,7 @@ public class Bot
 
   async Task<Message> SendReplyKeyboard(long chatId)
   {
-    return await this._bot.SendTextMessageAsync(chatId, await ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
-  }
-
-  InlineKeyboardMarkup InlineKeyboard()
-  {
-    return new InlineKeyboardMarkup()
-      .AddButtons(DayOfWeek.Monday.ToString(), DayOfWeek.Tuesday.ToString(), DayOfWeek.Wednesday.ToString())
-      .AddNewRow()
-      .AddButton(DayOfWeek.Thursday.ToString())
-      .AddButton(DayOfWeek.Friday.ToString());
+    return await this._bot.SendTextMessageAsync(chatId, await ShowAnswers(chatId, _week.number), replyMarkup: MessageHelpers.DaysKeyboard(), parseMode: ParseMode.Html);
   }
 
   public bool[] SelectedDays(long chatId)
@@ -152,11 +228,11 @@ public class Bot
     result.AppendFormat(@"<b>Days covered</b>:
 Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 ",
-       FormatDay(s[0]),
-       FormatDay(s[1]),
-       FormatDay(s[2]),
-       FormatDay(s[3]),
-       FormatDay(s[4]));
+       MessageHelpers.FormatDay(s[0]),
+       MessageHelpers.FormatDay(s[1]),
+       MessageHelpers.FormatDay(s[2]),
+       MessageHelpers.FormatDay(s[3]),
+       MessageHelpers.FormatDay(s[4]));
     result.Append("\n");
 
     var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
@@ -165,42 +241,25 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     {
       foreach (var answer in answersByWeek)
       {
-        if (string.IsNullOrEmpty(answer.FirstName) || answer.FirstName == "FirstName")
-        {
-          try
-          {
-            var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
-            answer.FirstName = chatMember.User.FirstName;
-            this._repo.SaveAnswer(answer);
-          }
-          catch
-          {
-            answer.FirstName = "NoName";
-          }
-        }
+        // if (string.IsNullOrEmpty(answer.User?.FirstName) || answer.User.FirstName == "FirstName")
+        // {
+        //   try
+        //   {
+        //     var chatMember = await _bot.GetChatMemberAsync(chatId, answer.User.UserId);
+        //     answer.User.FirstName = chatMember.User.FirstName;
+        //     this._repo.SaveAnswer(answer);
+        //   }
+        //   catch
+        //   {
+        //     answer.User.FirstName = "NoName";
+        //   }
+        // }
         result.AppendFormat("{0,-10}{1}\n",
-              $"<a href='tg://user?id={answer.UserId}'><code>{answer.FirstName.PadRight(9).Substring(0, 9)}</code></a>",
-              FormatSelectedDays(answer.SelectedDays));
+              $"<a href='tg://user?id={answer.User.UserId}'><code>{answer.User.FirstName.PadRight(9).Substring(0, 9)}</code></a>",
+              MessageHelpers.FormatSelectedDays(answer.SelectedDays));
       }
     }
     return result.ToString();
-  }
-
-  private string FormatSelectedDays(bool[] selectedDays)
-  {
-    var formattedDays = new StringBuilder();
-
-    foreach (var isSelected in selectedDays)
-    {
-      formattedDays.AppendFormat("{0,3}", isSelected ? "🌕" : "🌑"); //⚫🔴🟢
-    }
-
-    return formattedDays.ToString();
-  }
-
-  private string FormatDay(bool isSelected)
-  {
-    return isSelected ? "✅" : "❌";
   }
 
   async void PinMessage(Message msg, long chatId)
@@ -208,5 +267,4 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
     await _bot.PinChatMessageAsync(chatId, msg.MessageId);
 
   }
-  
 }

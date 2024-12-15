@@ -6,6 +6,8 @@ namespace InTheOfficeBot.Repository;
 public class SqLiteContext : DbContext
 {
   public DbSet<Answer> Answers { get; set; }
+  public DbSet<User> Users { get; set; }
+  public DbSet<Chat> Chats { get; set; }
 
   private readonly string _connectionString;
 
