@@ -9,7 +9,12 @@ public class AnswersRepository : IRepository
     _db = db ?? throw new ArgumentNullException(nameof(db));
   }
 
-  public IEnumerable<Answer> GetAnswersByUser(long chatId, long userId)
+    public IEnumerable<Answer> GetAnswersByChatId(long chatId)
+    {
+        return _db.Answers.Where(a => a.ChatId == chatId);
+    }
+
+    public IEnumerable<Answer> GetAnswersByUser(long chatId, long userId)
   {
     return _db.Answers.Where(a => a.ChatId == chatId && a.UserId == userId);
   }
