@@ -71,7 +71,8 @@ public class Bot
   private string GetStat(long chatId)
   {
     var answers = _repo.GetAnswersByChatId(chatId);
-
+    var totalDays = 0;
+    var totalWeeks = 0;
     var groupedByUser = answers.GroupBy(a => a.UserId)
           .Select(g =>
           {
@@ -79,6 +80,9 @@ public class Bot
             var lastAnswer = userAnswers.Last();
             int daysInTheOffice = userAnswers.Sum(a => a.SelectedDays.Count(b => b));
             int weeksInTheOffice = userAnswers.Count(a => a.SelectedDays.Any(b => b));
+
+            totalDays += daysInTheOffice;
+            totalWeeks += weeksInTheOffice;
 
             return new
             {
@@ -103,6 +107,9 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
     return @$"Here are the bot usage statistics:
 - Weeks of usage: {weeksCount}
 - Number of users: {usersCount}
+- Total days in the office: {totalDays}
+- Total weeks in the office: {totalWeeks}
+- Average days per week: {Math.Round((double)totalDays/totalWeeks, 1)}
 {statByUser}";
   }
 
