@@ -14,4 +14,5 @@ public interface IRepository
   User SaveUser(User user);
   User UpdateUser(User user);
   IEnumerable<Chat> GetChatsWhereUserIsAdmin(User user);
+  IEnumerable<Answer> GetAnswersByChatId(long chatId);
 }

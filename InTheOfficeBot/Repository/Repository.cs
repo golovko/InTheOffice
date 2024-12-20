@@ -85,4 +85,9 @@ public class Repository : IRepository
     return _db.Chats.Where(c=>c.AdminIds.Contains(user.Id));
   }
 
+    public IEnumerable<Answer> GetAnswersByChatId(long chatId)
+    {
+        return _db.Answers.Where(a => a.Chat.Id == chatId);
+    }
+
 }
