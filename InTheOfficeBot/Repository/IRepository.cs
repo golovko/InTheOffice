@@ -7,4 +7,5 @@ public interface IRepository
   IEnumerable<Answer> GetAnswersByWeek(long chatId, int weekOfTheYear);
   Answer? GetLatestUserAnswer(long chatId, int weekOfTheYear, long userId);
   long[] GetChatIds();
+  IEnumerable<Answer> GetAnswersByChatId(long chatId);
 }
