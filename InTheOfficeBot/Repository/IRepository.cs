@@ -6,10 +6,11 @@ public interface IRepository
   IEnumerable<Answer> GetAnswersByUser(long chatId, long userId);
   IEnumerable<Answer> GetAnswersByWeek(long chatId, int weekOfTheYear);
   Answer? GetLatestUserAnswer(long chatId, int weekOfTheYear, long userId);
-  long[] GetChatIds();
+  IEnumerable<long> GetChatIds(Func<Chat, bool> filter = null);
   Chat SaveChat(Chat chat);
   Chat UpdateChat(Chat chat);
   Chat GetChat(long chatId);
+  Chat GetChat(string chatName);
   User GetUser(long userId);
   User SaveUser(User user);
   User UpdateUser(User user);

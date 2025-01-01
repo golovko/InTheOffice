@@ -3,6 +3,7 @@ using System;
 using InTheOfficeBot.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InTheOfficeBot.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20241222184936_ChatIdLong")]
+    partial class ChatIdLong
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -64,9 +67,6 @@ namespace InTheOfficeBot.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ChatName")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DaysOff")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsStopped")

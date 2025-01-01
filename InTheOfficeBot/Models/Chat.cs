@@ -14,12 +14,13 @@ public record Chat
     public DayOfWeek SendPollOnDayOfWeek { get; set; }
     public TimeOnly SendPollAt { get; set; }
     public bool IsStopped { get; set; }
-    public List<int>? AdminIds { get; private set; }
+    public List<long>? AdminIds { get; set; }
     public bool PinLatestPoll { get; set; }
+    public List<DateOnly>? DaysOff { get; set; }
 
     public void AddAdmin(User user)
     {
-        AdminIds ??= new List<int>();
+        AdminIds ??= new List<long>();
         if (AdminIds.Contains(user.Id))
         {
             return;
