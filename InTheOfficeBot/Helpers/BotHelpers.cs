@@ -1,8 +1,8 @@
 using System.Text;
-using InTheOfficeBot;
-using InTheOfficeBot.Helpers;
 using InTheOfficeBot.Models;
 using InTheOfficeBot.Repository;
+
+namespace InTheOfficeBot.Helpers;
 
 public class BotHelpers
 {
@@ -20,7 +20,7 @@ public class BotHelpers
 
   public string GetStat(long chatId)
   {
-    var answers = _repo.GetAnswersByChatId(chatId);
+    var answers = this._repo.GetAnswersByChatId(chatId);
     var totalDays = 0;
     var totalWeeks = 0;
     var groupedByUser = new List<dynamic>();
@@ -34,6 +34,7 @@ public class BotHelpers
         {
           userGroups[answer.User.UserId] = new List<Answer>();
         }
+
         userGroups[answer.User.UserId].Add(answer);
       }
     }
@@ -70,13 +71,13 @@ public class BotHelpers
     var usersCount = groupedByUser.Count;
 
     var statByUser = string.Join("\n", groupedByUser.Select(stat =>
-@$"
+      @$"
 User: #{stat.UserId} {stat.Username}
 Days in the office: {stat.DaysInTheOffice}
 Weeks in the office: {stat.WeeksInTheOffice}
 Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1)}"));
 
-    return @$"Here are the bot usage statistics for chat {_repo.GetChat(chatId)?.ChatName}:
+    return @$"Here are the bot usage statistics for chat {this._repo.GetChat(chatId)?.ChatName}:
 - Weeks of usage: {weeksCount}
 - Number of users: {usersCount}
 - Total days in the office: {totalDays}
@@ -92,14 +93,14 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
     result.AppendFormat(@"<b>Days covered</b>:
 Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
 ",
-       MessageHelpers.FormatDay(s[0]),
-       MessageHelpers.FormatDay(s[1]),
-       MessageHelpers.FormatDay(s[2]),
-       MessageHelpers.FormatDay(s[3]),
-       MessageHelpers.FormatDay(s[4]));
+      MessageHelpers.FormatDay(s[0]),
+      MessageHelpers.FormatDay(s[1]),
+      MessageHelpers.FormatDay(s[2]),
+      MessageHelpers.FormatDay(s[3]),
+      MessageHelpers.FormatDay(s[4]));
     result.Append("\n");
 
-    var answersByWeek = _repo.GetAnswersByWeek(chatId, week);
+    var answersByWeek = this._repo.GetAnswersByWeek(chatId, week);
 
     if (answersByWeek.Any())
     {
@@ -111,21 +112,23 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
         }
 
         result.AppendFormat("{0,-10}{1}\n",
-              $"<code><a href='tg://user?id={answer.User.UserId}'>{answer.User.FirstName.PadRight(9).Substring(0, 9)}</a></code>",
-              MessageHelpers.FormatSelectedDays(answer.SelectedDays));
+          $"<code><a href='tg://user?id={answer.User.UserId}'>{answer.User.FirstName.PadRight(9).Substring(0, 9)}</a></code>",
+          MessageHelpers.FormatSelectedDays(answer.SelectedDays));
       }
     }
+
     return result.ToString();
   }
 
-  internal bool CheckNonWorkingDays(string? data){
+  internal bool CheckNonWorkingDays(string? data)
+  {
     return false;
   }
 
   private bool[] SelectedDays(long chatId)
   {
     bool[] coveredDays = new bool[5];
-    var answers = _repo.GetAnswersByWeek(chatId, Helpers.GetWeekOrNextWeek().Item2);
+    var answers = this._repo.GetAnswersByWeek(chatId, Helpers.GetWeekOrNextWeek().Item2);
     foreach (var answer in answers)
     {
       for (var i = 0; i < answer.SelectedDays.Length; i++)
@@ -133,10 +136,12 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
         if (answer.SelectedDays[i]) coveredDays[i] = true;
       }
     }
+
     return coveredDays;
   }
 
-  public void UpdateChatAdmins(){
+  public void UpdateChatAdmins()
+  {
     //     var admins = await _bot.GetChatAdministrators(query.Message.Chat.Id);
     // foreach (var admin in admins)
     // {

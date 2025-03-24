@@ -1,4 +1,5 @@
 using System.Globalization;
+
 namespace InTheOfficeBot.Helpers;
 
 public static class Helpers
@@ -24,17 +25,18 @@ public static class Helpers
     var currentWeek = ISOWeek.GetWeekOfYear(today);
 
     // Determine if it's Friday or later (Friday, Saturday, or Sunday)
-    if (today.DayOfWeek == DayOfWeek.Friday || today.DayOfWeek == DayOfWeek.Saturday || today.DayOfWeek == DayOfWeek.Sunday)
+    if (today.DayOfWeek == DayOfWeek.Friday || today.DayOfWeek == DayOfWeek.Saturday ||
+        today.DayOfWeek == DayOfWeek.Sunday)
     {
       // Check if it's the last week of the year, and handle wraparound to the next year
       if (currentWeek == 52 && ISOWeek.GetYear(today) == today.Year)
       {
-        currentWeek = 1;  // Move to week 1 of the next year
-        today = new DateTime(today.Year + 1, 1, 1);  // Move to next year
+        currentWeek = 1; // Move to week 1 of the next year
+        today = new DateTime(today.Year + 1, 1, 1); // Move to next year
       }
       else
       {
-        currentWeek++;  // Move to the next week
+        currentWeek++; // Move to the next week
       }
     }
 
@@ -51,6 +53,7 @@ public static class Helpers
 
     return ($"{startDate} - {endDate}", currentWeek);
   }
+
   public static DateTime ParseDayAndTime(string input)
   {
     var parts = input.Split(", ");

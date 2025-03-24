@@ -3,8 +3,9 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace InTheOfficeBot.Helpers;
 
-public static class MessageHelpers{
-    public static InlineKeyboardMarkup DaysKeyboard()
+public static class MessageHelpers
+{
+  public static InlineKeyboardMarkup DaysKeyboard()
   {
     return new InlineKeyboardMarkup()
       .AddButtons(DayOfWeek.Monday.ToString(), DayOfWeek.Tuesday.ToString(), DayOfWeek.Wednesday.ToString())
@@ -25,9 +26,8 @@ public static class MessageHelpers{
     return formattedDays.ToString();
   }
 
-    public static string FormatDay(bool isSelected)
+  public static string FormatDay(bool isSelected)
   {
     return isSelected ? "✅" : "❌";
   }
-
 }

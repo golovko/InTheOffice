@@ -3,9 +3,11 @@ using InTheOfficeBot.Models;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace InTheOfficeBot.Repository;
+
 public class Repository : IRepository
 {
   private SqLiteContext _db;
+
   public Repository(SqLiteContext db)
   {
     _db = db ?? throw new ArgumentNullException(nameof(db));
@@ -18,7 +20,8 @@ public class Repository : IRepository
 
   public IEnumerable<Answer> GetAnswersByWeek(long chatId, int weekOfTheYear)
   {
-    return _db.Answers.Where(a => a.Chat.ChatId == chatId && a.WeekOfTheYear == weekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
+    return _db.Answers.Where(a =>
+      a.Chat.ChatId == chatId && a.WeekOfTheYear == weekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
   }
 
   public Chat GetChat(long chatId)
@@ -38,17 +41,19 @@ public class Repository : IRepository
     {
       query = (IQueryable<Chat>)query.Where(filter);
     }
+
     return query.Select(c => c.ChatId).Distinct();
   }
 
   public Answer? GetLatestUserAnswer(long chatId, int weekOfTheYear, long userId)
   {
-    return _db.Answers.FirstOrDefault(a => a.Chat.ChatId == chatId && a.User.UserId == userId && a.WeekOfTheYear == weekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
+    return _db.Answers.FirstOrDefault(a =>
+      a.Chat.ChatId == chatId && a.User.UserId == userId && a.WeekOfTheYear == weekOfTheYear &&
+      a.UpdatedAt.Year == DateTime.Now.Year);
   }
 
   public void SaveAnswer(Answer answer)
   {
-
     //var result = _db.Answers.FirstOrDefault(a => a.Chat.ChatId == answer.Chat.ChatId && a.User.UserId == answer.User.UserId && a.WeekOfTheYear == answer.WeekOfTheYear);
     var result = _db.Answers.FirstOrDefault(a => a.Id == answer.Id);
     if (result == null)
@@ -59,6 +64,7 @@ public class Repository : IRepository
     {
       _db.Answers.Update(answer);
     }
+
     _db.SaveChanges();
   }
 
@@ -74,21 +80,23 @@ public class Repository : IRepository
     {
       savedChat = _db.Chats.Update(chat);
     }
+
     _db.SaveChanges();
     return savedChat.Entity;
   }
+
   public Chat UpdateChat(Chat chat)
   {
     var updatedChat = _db.Chats.Update(chat);
     _db.SaveChanges();
     return updatedChat.Entity;
-
   }
 
   public User GetUser(long userId)
   {
     return _db.Users.FirstOrDefault(u => u.UserId == userId);
   }
+
   public User SaveUser(User user)
   {
     var savedUser = _db.Users.Add(user);
@@ -102,6 +110,7 @@ public class Repository : IRepository
     _db.SaveChanges();
     return updatedUser.Entity;
   }
+
   public IEnumerable<Chat> GetChatsWhereUserIsAdmin(User user)
   {
     return _db.Chats.Where(c => c.AdminIds.Contains(user.UserId));
@@ -112,5 +121,4 @@ public class Repository : IRepository
     var answer = _db.Answers.Where(a => a.Chat.ChatId == chatId);
     return _db.Answers.Where(a => a.Chat.ChatId == chatId);
   }
-
 }

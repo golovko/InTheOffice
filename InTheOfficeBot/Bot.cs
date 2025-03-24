@@ -1,20 +1,21 @@
-using System.Text;
 using InTheOfficeBot;
 using InTheOfficeBot.Helpers;
 using InTheOfficeBot.Models;
 using InTheOfficeBot.Repository;
-using Microsoft.VisualBasic;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.InlineQueryResults;
 using Telegram.Bot.Types.ReplyMarkups;
+using Chat = InTheOfficeBot.Models.Chat;
 
 public class Bot
 {
   private (string range, int number) _week => Helpers.GetWeekOrNextWeek();
-  private string _welcomeMessage => $"Hiya!\nPlease choose your office days for the upcoming week: <b>{_week.range}</b>";
+
+  private string _welcomeMessage =>
+    $"Hiya!\nPlease choose your office days for the upcoming week: <b>{_week.range}</b>";
+
   private TelegramBotClient _bot;
   private CancellationTokenSource _cts = new();
   private IRepository _repo;
@@ -52,8 +53,8 @@ public class Bot
     {
       user = _repo.SaveUser(new()
       {
-        UserId = msg.From.Id,
-        FirstName = msg.From.FirstName,
+        UserId = msg.From.Id, 
+        FirstName = msg.From.FirstName, 
         Nickname = msg.From.Username ?? msg.From.FirstName,
       });
     }
@@ -67,9 +68,9 @@ public class Bot
     var chat = this._repo.GetChat(msg.Chat.Id);
     if (chat == null)
     {
-      chat = new()
+      chat = new Chat
       {
-        ChatId = msg.Chat.Id,
+        ChatId = msg.Chat.Id, 
         ChatName = msg.Chat.FirstName ?? msg.Chat.Title ?? msg.Chat.LastName,
       };
 
@@ -98,7 +99,9 @@ public class Bot
           scheduleChat.SendPollOnDayOfWeek = (DayOfWeek)Enum.Parse(typeof(DayOfWeek), msg.Text.Split(" ")[0], true);
           scheduleChat.SendPollAt = TimeOnly.Parse(msg.Text.Split(" ")[1]);
           _repo.SaveChat(scheduleChat);
-          await _bot.SendMessage(chatId, $"Scheduler for chat {scheduleChat.ChatName} successfully set to {scheduleChat.SendPollAt.ToShortTimeString()} each {scheduleChat.SendPollOnDayOfWeek}", parseMode: ParseMode.Html);
+          await _bot.SendMessage(chatId,
+            $"Scheduler for chat {scheduleChat.ChatName} successfully set to {scheduleChat.SendPollAt.ToShortTimeString()} each {scheduleChat.SendPollOnDayOfWeek}",
+            parseMode: ParseMode.Html);
         }
       }
 
@@ -143,16 +146,17 @@ public class Bot
             {
               adminChatNames.AddButton(adminChat.ChatName ?? "ChatWithoutName");
             }
-            await this._bot.SendMessage(chatId, "Select chat to manage", replyMarkup: adminChatNames, parseMode: ParseMode.Html);
+
+            await this._bot.SendMessage(chatId, "Select chat to manage", replyMarkup: adminChatNames,
+              parseMode: ParseMode.Html);
           }
           else
           {
             await _bot.SendMessage(chatId, "You don't have chats to manage", parseMode: ParseMode.Html);
           }
+
           break;
-
       }
-
     }
     else
     {
@@ -161,9 +165,10 @@ public class Bot
       switch (message)
       {
         case "/start":
-          string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
-                                "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
-                                "Use the /check command to see the latest answers.";
+          string startMessage =
+            "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
+            "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
+            "Use the /check command to see the latest answers.";
           await _bot.SendMessage(chatId, startMessage, parseMode: ParseMode.Html);
           break;
 
@@ -182,6 +187,7 @@ public class Bot
           {
             PinMessage(sentMsg, chatId);
           }
+
           break;
       }
     }
@@ -247,6 +253,7 @@ public class Bot
       {
         stringId = query.Message.Text.Split("#")[1];
       }
+
       var parsed = long.TryParse(stringId, out var chatId);
       var currentChat = _repo.GetChat(chatId);
 
@@ -255,44 +262,55 @@ public class Bot
         case "switchBotState":
           currentChat.IsStopped = !currentChat.IsStopped;
           this._repo.SaveChat(currentChat);
-          await this._bot.AnswerCallbackQuery(query.Id, $"You just " + (currentChat.IsStopped ? "🛑 stopped" : "🚀 started") + " the bot");
-          await this._bot.EditMessageReplyMarkup(chatId: query.Message.Chat.Id, messageId: query.Message.Id, replyMarkup: GetChatKeyboard(currentChat.ChatId));
+          await this._bot.AnswerCallbackQuery(query.Id,
+            $"You just " + (currentChat.IsStopped ? "🛑 stopped" : "🚀 started") + " the bot");
+          await this._bot.EditMessageReplyMarkup(chatId: query.Message.Chat.Id, messageId: query.Message.Id,
+            replyMarkup: GetChatKeyboard(currentChat.ChatId));
           break;
 
         case "Scheduler":
 
-          messageText = "Please reply to this message with a day and time for weekly automatic sending poll to the chat in a format: <b>Day HH:MM</b>\n" +
-                        "Example: <b>Friday 10:00</b>\n\n" +
-                        "Current scheduled day: " + currentChat.SendPollOnDayOfWeek + "\n" +
-                        "Current scheduled time: " + currentChat.SendPollAt.ToShortTimeString() + "\n" +
-                        "Chat: " + currentChat.ChatName + "\n" +
-                        "Chat ID: #" + currentChat.ChatId;
-          await this._bot.AnswerCallbackQuery(query.Id, $"You are about setting up scheduler for chat '{currentChat.ChatName}'");
+          messageText =
+            "Please reply to this message with a day and time for weekly automatic sending poll to the chat in a format: <b>Day HH:MM</b>\n" +
+            "Example: <b>Friday 10:00</b>\n\n" +
+            "Current scheduled day: " + currentChat.SendPollOnDayOfWeek + "\n" +
+            "Current scheduled time: " + currentChat.SendPollAt.ToShortTimeString() + "\n" +
+            "Chat: " + currentChat.ChatName + "\n" +
+            "Chat ID: #" + currentChat.ChatId;
+          await this._bot.AnswerCallbackQuery(query.Id,
+            $"You are about setting up scheduler for chat '{currentChat.ChatName}'");
           await this._bot.SendMessage(query.Message.Chat.Id, messageText, parseMode: ParseMode.Html);
           break;
 
         case "Off days":
-          messageText = "Please reply to this message with a list of dates off in the format: <b>DD.MM</b>, each date on a separate line.\n" +
-                "Example:\n<b>01.01\n08.03</b>\n\n" +
-                "Current off-days: " + (currentChat.DaysOff != null ? string.Join("\n", currentChat.DaysOff.Select(d => d.ToShortDateString())) : "Not set yet") + "\n" +
-                "Chat: " + currentChat.ChatName + "\n" +
-                "Chat ID: #" + currentChat.ChatId;
-          await this._bot.AnswerCallbackQuery(query.Id, $"You are about setting up scheduler for chat '{currentChat.ChatName}'");
+          messageText =
+            "Please reply to this message with a list of dates off in the format: <b>DD.MM</b>, each date on a separate line.\n" +
+            "Example:\n<b>01.01\n08.03</b>\n\n" +
+            "Current off-days: " + (currentChat.DaysOff != null
+              ? string.Join("\n", currentChat.DaysOff.Select(d => d.ToShortDateString()))
+              : "Not set yet") + "\n" +
+            "Chat: " + currentChat.ChatName + "\n" +
+            "Chat ID: #" + currentChat.ChatId;
+          await this._bot.AnswerCallbackQuery(query.Id,
+            $"You are about setting up scheduler for chat '{currentChat.ChatName}'");
           await this._bot.SendMessage(query.Message.Chat.Id, messageText, parseMode: ParseMode.Html);
           break;
 
         case "Auto pinning":
           currentChat.PinLatestPoll = !currentChat.PinLatestPoll;
           this._repo.SaveChat(currentChat);
-          await this._bot.AnswerCallbackQuery(query.Id, "You turned auto pinning " + (currentChat.PinLatestPoll ? "🟢 on" : "🔴 off"));
-          await this._bot.EditMessageReplyMarkup(chatId: query.Message.Chat.Id, messageId: query.Message.Id, replyMarkup: GetChatKeyboard(currentChat.ChatId));
+          await this._bot.AnswerCallbackQuery(query.Id,
+            "You turned auto pinning " + (currentChat.PinLatestPoll ? "🟢 on" : "🔴 off"));
+          await this._bot.EditMessageReplyMarkup(chatId: query.Message.Chat.Id, messageId: query.Message.Id,
+            replyMarkup: GetChatKeyboard(currentChat.ChatId));
 
           break;
 
         case "Get stats":
           await this._bot.AnswerCallbackQuery(query.Id, $"You picked {query.Data}");
 
-          await _bot.SendMessage(query.Message.Chat.Id, _helpers.GetStat(currentChat.ChatId), parseMode: ParseMode.Html);
+          await _bot.SendMessage(query.Message.Chat.Id, _helpers.GetStat(currentChat.ChatId),
+            parseMode: ParseMode.Html);
 
           break;
 
@@ -301,15 +319,15 @@ public class Bot
 
           if (_repo.GetChatsWhereUserIsAdmin(user).Select(c => c.ChatName).Contains(query.Data))
           {
-            messageText = $"Please select option to configure chat '{query.Data}' chat ID: #{_repo.GetChatsWhereUserIsAdmin(user).First(c => c.ChatName == query.Data).ChatId}";
+            messageText =
+              $"Please select option to configure chat '{query.Data}' chat ID: #{_repo.GetChatsWhereUserIsAdmin(user).First(c => c.ChatName == query.Data).ChatId}";
           }
-          await this._bot.EditMessageText(chatId: query.Message.Chat.Id, messageId: query.Message.Id, messageText, replyMarkup: chatKeyboard, parseMode: ParseMode.Html);
+
+          await this._bot.EditMessageText(chatId: query.Message.Chat.Id, messageId: query.Message.Id, messageText,
+            replyMarkup: chatKeyboard, parseMode: ParseMode.Html);
 
           break;
-
       }
-
-
     }
     else
     {
@@ -318,7 +336,7 @@ public class Bot
       await this._bot.AnswerCallbackQuery(query.Id, $"You picked {query.Data}");
 
       var day = Enum.Parse<DayOfWeek>(query.Data!, true);
-      var messageId = (int)query.Message?.MessageId;
+      var messageId = (int)query.Message?.MessageId!;
       var latestAnswer = _repo.GetLatestUserAnswer(chat.ChatId, _week.number, user.UserId);
 
       if (latestAnswer is null)
@@ -339,20 +357,26 @@ public class Bot
       this._repo.SaveAnswer(latestAnswer);
 
       var updatedText = await _helpers.ShowAnswers(chat.ChatId, _week.number);
-      await this._bot.EditMessageText(chat.ChatId, messageId, updatedText, replyMarkup: MessageHelpers.DaysKeyboard(), parseMode: ParseMode.Html);
+      await this._bot.EditMessageText(chat.ChatId, messageId, updatedText, replyMarkup: MessageHelpers.DaysKeyboard(),
+        parseMode: ParseMode.Html);
     }
   }
 
   private InlineKeyboardMarkup GetChatKeyboard(long chatId)
   {
     var chat = _repo.GetChat(chatId);
-    return new InlineKeyboardMarkup(new[] {
-        new[] { InlineKeyboardButton.WithCallbackData(chat.IsStopped? "🚀 Start bot" : "🛑 Stop bot ", "switchBotState") },
-        new[] { InlineKeyboardButton.WithCallbackData("🕘 Scheduler", "Scheduler") },
-        new[] { InlineKeyboardButton.WithCallbackData("📆 Off days", "Off days") },
-        new[] { InlineKeyboardButton.WithCallbackData(chat.PinLatestPoll ? "📌 Turn Auto Pinning Off": "📌 Turn Auto Pinning On", "Auto pinning") },
-        new[] { InlineKeyboardButton.WithCallbackData("📈 Get stats", "Get stats") },
-      });
+    return new InlineKeyboardMarkup([
+      [
+        InlineKeyboardButton.WithCallbackData(chat.IsStopped ? "🚀 Start bot" : "🛑 Stop bot ", "switchBotState")
+      ],
+      [InlineKeyboardButton.WithCallbackData("🕘 Scheduler", "Scheduler")],
+      [InlineKeyboardButton.WithCallbackData("📆 Off days", "Off days")],
+      [
+        InlineKeyboardButton.WithCallbackData(
+          chat.PinLatestPoll ? "📌 Turn Auto Pinning Off" : "📌 Turn Auto Pinning On", "Auto pinning")
+      ],
+      [InlineKeyboardButton.WithCallbackData("📈 Get stats", "Get stats")]
+    ]);
   }
 
   public async Task SendPoll()
@@ -380,10 +404,11 @@ public class Bot
 
   async Task<Message> SendReplyKeyboard(long chatId)
   {
-    return await this._bot.SendMessage(chatId, await _helpers.ShowAnswers(chatId, _week.number), replyMarkup: MessageHelpers.DaysKeyboard(), parseMode: ParseMode.Html);
+    return await this._bot.SendMessage(chatId, await _helpers.ShowAnswers(chatId, _week.number),
+      replyMarkup: MessageHelpers.DaysKeyboard(), parseMode: ParseMode.Html);
   }
 
-  async void PinMessage(Message msg, long chatId)
+  async Task PinMessage(Message msg, long chatId)
   {
     try
     {
@@ -392,14 +417,15 @@ public class Bot
     catch (System.Exception)
     {
       this._logger.LogInformation("Can't unpin a message to a chat");
-    } 
-        try
+    }
+
+    try
     {
       await _bot.PinChatMessage(chatId, msg.MessageId);
     }
     catch (System.Exception)
     {
       this._logger.LogInformation("Can't pin a message to a chat");
-    } 
+    }
   }
 }
