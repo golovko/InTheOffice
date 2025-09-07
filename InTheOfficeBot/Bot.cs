@@ -49,21 +49,21 @@ public class Bot
         string startMessage = "To use this bot, add it to a group chat and use the /poll command for the first time.\n" +
                               "The bot will send a reminder to choose days in the group chat every Friday morning to plan the next week.\n" +
                               "Use the /check command to see the latest answers.";
-        await _bot.SendTextMessageAsync(chatId, startMessage, parseMode: ParseMode.Html);
+        await _bot.SendMessage(chatId, startMessage, parseMode: ParseMode.Html);
         break;
 
       case "/check":
         string checkMessage = $"<b>Week: {_week.range}</b>\n{await ShowAnswers(msg.Chat.Id, _week.number)}";
-        await _bot.SendTextMessageAsync(chatId, checkMessage, parseMode: ParseMode.Html);
+        await _bot.SendMessage(chatId, checkMessage, parseMode: ParseMode.Html);
         break;
 
       case "/poll":
-        await _bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+        await _bot.SendMessage(chatId, _welcomeMessage, parseMode: ParseMode.Html);
         await SendReplyKeyboard(chatId);
         break;
 
       case "/stat":
-        await _bot.SendTextMessageAsync(chatId, GetStat(chatId), parseMode: ParseMode.Html);
+        await _bot.SendMessage(chatId, GetStat(chatId), parseMode: ParseMode.Html);
         break;
     }
   }
@@ -120,7 +120,7 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
       return;
     }
 
-    await this._bot.AnswerCallbackQueryAsync(query.Id, $"You picked {query.Data}");
+    await this._bot.AnswerCallbackQuery(query.Id, $"You picked {query.Data}");
 
     var day = Enum.Parse<DayOfWeek>(query.Data!, true);
     var chatId = query.Message!.Chat.Id;
@@ -141,7 +141,7 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
     var updatedText = await ShowAnswers(chatId, _week.number);
     var replyMarkup = InlineKeyboard();
 
-    await this._bot.EditMessageTextAsync(chatId, messageId, updatedText, replyMarkup: replyMarkup, parseMode: ParseMode.Html);
+    await this._bot.EditMessageText(chatId, messageId, updatedText, replyMarkup: replyMarkup, parseMode: ParseMode.Html);
   }
 
   public async Task SendPoll()
@@ -152,7 +152,7 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
       try
       {
         this._logger.LogInformation("Sending a message into the chat: " + chatId);
-        await this._bot.SendTextMessageAsync(chatId, _welcomeMessage, parseMode: ParseMode.Html);
+        await this._bot.SendMessage(chatId, _welcomeMessage, parseMode: ParseMode.Html);
         await SendReplyKeyboard(chatId);
       }
       catch (System.Exception e)
@@ -164,7 +164,7 @@ Average d/w: {Math.Round((double)stat.DaysInTheOffice / stat.WeeksInTheOffice, 1
 
   async Task<Message> SendReplyKeyboard(long chatId)
   {
-    return await this._bot.SendTextMessageAsync(chatId, await ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
+    return await this._bot.SendMessage(chatId, await ShowAnswers(chatId, _week.number), replyMarkup: InlineKeyboard(), parseMode: ParseMode.Html);
   }
 
   InlineKeyboardMarkup InlineKeyboard()
@@ -214,7 +214,7 @@ Mo {0}  Tu {1}  We {2}  Th {3}  Fr {4}
         {
           try
           {
-            var chatMember = await _bot.GetChatMemberAsync(chatId, answer.UserId);
+            var chatMember = await _bot.GetChatMember(chatId, answer.UserId);
             answer.FirstName = chatMember.User.FirstName;
             this._repo.SaveAnswer(answer);
           }

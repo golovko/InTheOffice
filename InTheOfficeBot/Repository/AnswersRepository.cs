@@ -36,7 +36,7 @@ public class AnswersRepository : IRepository
 
   public void SaveAnswer(Answer answer)
   {
-    var result = _db.Answers.FirstOrDefault(a => a.ChatId == answer.ChatId && a.UserId == answer.UserId && a.WeekOfTheYear == answer.WeekOfTheYear);
+    var result = _db.Answers.FirstOrDefault(a => a.ChatId == answer.ChatId && a.UserId == answer.UserId && a.WeekOfTheYear == answer.WeekOfTheYear && a.UpdatedAt.Year == DateTime.Now.Year);
     if (result == null)
     {
       _db.Answers.Add(answer);
