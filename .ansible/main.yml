@@ -1,7 +1,7 @@
 - name: Deploy InTheOfficeBot
   hosts: all
   become: true
-  remote_user: {{ HETZNER_USER }}
+  remote_user: "{{ HETZNER_USER }}"
   vars:
     ansible_python_interpreter: /usr/bin/python3.12 
     dir: "{{ APP_PATH }}"
