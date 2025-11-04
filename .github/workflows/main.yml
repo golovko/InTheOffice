@@ -16,7 +16,7 @@ jobs:
           key: ${{secrets.HETZNER_SSH_PRIVATE_KEY}}
           inventory: |
             [all]
-            hetzner ansible_host=${{ vars.HETZNER_IP }} ansible_user=${{ vars.HETZNER_USER }} ansible_port=${{ vars.HETZNER_SSH_PORT }}
+            hetzner ansible_host=${{ vars.HETZNER_IP }} ansible_user=${{ vars.HETZNER_USER }} ansible_port=${{ vars.HETZNER_SSH_PORT }} ansible_become_password=${{ secrets.HETZNER_PASSWORD }}
           options: 
             -e GITHUB_REPO=${{github.repository}}
             -e PORT=${{vars.PORT}}   
