@@ -3,7 +3,7 @@
   become: true
   remote_user: "{{ HETZNER_USER }}"
   vars:
-    ansible_python_interpreter: /usr/bin/python3.12 
+    ansible_python_interpreter: /usr/bin/python3.11 
     dir: "{{ APP_PATH }}"
     app_name: "InTheOfficeBot"
     git_repo: "https://github.com/golovko/InTheOffice.git"
