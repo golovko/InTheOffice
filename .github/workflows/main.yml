@@ -1,4 +1,4 @@
-name: Deploy InTheOfficeBot to AWS 
+name: Deploy InTheOfficeBot to HETZNER 
 
 on: 
   push:
@@ -13,14 +13,15 @@ jobs:
         uses: dawidd6/action-ansible-playbook@v2
         with:
           playbook: .ansible/main.yml
-          key: ${{secrets.AWS_SSH_PRIVATE_KEY}}
+          key: ${{secrets.HETZNER_SSH_PRIVATE_KEY}}
           inventory: |
             [all]
-            ${{secrets.AWS}} address=localhost
+            hetzner ansible_host=${{ vars.HETZNER_IP }} ansible_user=${{ vars.HETZNER_USER }} ansible_port=${{ vars.HETZNER_SSH_PORT }}
           options: 
             -e GITHUB_REPO=${{github.repository}}
             -e PORT=${{vars.PORT}}   
             -e APP_PATH=${{vars.APP_PATH}}
+            -e HETZNER_USER=${{vars.HETZNER_USER}}
         env:
           BOT_TOKEN: ${{secrets.BOT_TOKEN}}
           CONNECTION_STRING: ${{vars.CONNECTION_STRING}}

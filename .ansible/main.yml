@@ -1,14 +1,14 @@
 - name: Deploy InTheOfficeBot
   hosts: all
   become: true
-  remote_user: ubuntu
+  remote_user: {{ HETZNER_USER }}
   vars:
     ansible_python_interpreter: /usr/bin/python3.12 
     dir: "{{ APP_PATH }}"
     app_name: "InTheOfficeBot"
     git_repo: "https://github.com/golovko/InTheOffice.git"
     git_branch: "main"
-    dotnet_sdk_version: "8.0"
+    dotnet_sdk_version: "9.0"
     app_path: "{{ dir }}/InTheOffice"
     publish_folder: "{{ app_path }}/publish"
     service_name: "{{ app_name }}.service"
@@ -19,7 +19,4 @@
       - key: "CONNECTION_STRING"
         value: "{{ lookup('env', 'CONNECTION_STRING') }}"
   roles:
-  # - git_pull
-     - role: deploy_service
-  # - docker_restart
-  
+     - role: deploy_service  
