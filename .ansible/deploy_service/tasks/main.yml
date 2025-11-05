@@ -32,7 +32,7 @@
       RestartSec=10
       KillSignal=SIGINT
       SyslogIdentifier=dotnet-{{ app_name }}
-      User=ubuntu
+      User={{ HETZNER_USER }}
       Environment=ASPNETCORE_ENVIRONMENT=Production
       {% for var in environment_vars %}
       Environment={{ var.key }}={{ var.value }}
